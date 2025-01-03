@@ -6,8 +6,14 @@ import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraft.client.renderer.GlStateManager
 
-@Mod(modid = "maxpenisclient", useMetadata = true)
-class ExampleMod {
+@Mod(
+    modid = ModCore.MOD_ID,
+    name = ModCore.NAME,
+    version = ModCore.VERSION,
+    clientSideOnly = true
+)
+
+class ModCore {
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
         try {
@@ -22,4 +28,13 @@ class ExampleMod {
 	    // Below is a demonstration of an access-transformed class access.
 	    println("Color State: " + GlStateManager.Color());
     }
+
+
+    companion object {
+        const val MOD_ID = "maxpenisaddons"
+        const val NAME = "MaxPenisAddons"
+        const val VERSION = "1.0.0"
+    }
 }
+
+
