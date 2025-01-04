@@ -1,5 +1,6 @@
 package com.github.hul1an.maxpenisclient.commands
 
+
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.command.CommandBase
@@ -17,6 +18,9 @@ import net.minecraftforge.fml.common.eventhandler.Cancelable
 import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.apache.logging.log4j.LogManager
+import kotlin.reflect.KParameter
+
+
 
 
 class CrashCommand: CommandBase() {
@@ -49,5 +53,5 @@ class CrashCommand: CommandBase() {
         return listOf("dontcrashme")
     }
 
-
 }
+

@@ -1,9 +1,8 @@
 package com.github.hul1an.maxpenisclient
 
+
 import com.github.hul1an.maxpenisclient.commands.CrashCommand
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.init.Blocks
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.common.MinecraftForge
@@ -22,11 +21,18 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 )
 
 class ModCore {
+
+    var maxpenisConfig: MyConfig? = null
+
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
+
+        maxpenisConfig = MyConfig()
+
         MinecraftForge.EVENT_BUS.register(MyEventHandlerClass())
         MinecraftForge.EVENT_BUS.register(this)
         ClientCommandHandler.instance.registerCommand(CrashCommand())
+
 
         try {
             val resource: net.minecraft.client.resources.IResource = Minecraft.getMinecraft().resourceManager
@@ -36,9 +42,7 @@ class ModCore {
             throw java.lang.RuntimeException(e)
         }
 
-        println("Dirt: ${Blocks.dirt.unlocalizedName}")
-	    // Below is a demonstration of an access-transformed class access.
-	    println("Color State: " + GlStateManager.Color())
+
     }
 
 
