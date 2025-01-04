@@ -1,8 +1,10 @@
 package com.github.hul1an.maxpenisclient
 
+import com.github.hul1an.maxpenisclient.commands.CrashCommand
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.init.Blocks
+import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
@@ -10,6 +12,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.Cancelable
 import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+
 
 @Mod(
     modid = ModCore.MOD_ID,
@@ -23,6 +26,7 @@ class ModCore {
     fun init(event: FMLInitializationEvent) {
         MinecraftForge.EVENT_BUS.register(MyEventHandlerClass())
         MinecraftForge.EVENT_BUS.register(this)
+        ClientCommandHandler.instance.registerCommand(CrashCommand())
 
         try {
             val resource: net.minecraft.client.resources.IResource = Minecraft.getMinecraft().resourceManager

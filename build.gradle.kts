@@ -74,6 +74,8 @@ repositories {
     maven("https://repo.spongepowered.org/maven/")
     // If you don't want to log in with your real minecraft account, remove this line
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
+    maven("https://repo.essential.gg/repository/maven-public")
+
 }
 
 val shadowImpl: Configuration by configurations.creating {
@@ -84,6 +86,8 @@ dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
+    implementation("gg.essential:vigilance:306")
+    modImplementation("gg.essential:universalcraft-1.8.9-forge:369")
 
     shadowImpl(kotlin("stdlib-jdk8"))
 
@@ -95,6 +99,8 @@ dependencies {
 
     // If you don't want to log in with your real minecraft account, remove this line
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.1")
+
+
 
 }
 
@@ -155,6 +161,17 @@ tasks.shadowJar {
 
     // If you want to include other dependencies and shadow them, you can relocate them in here
     fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
+}
+tasks.shadowJar {
+    archiveClassifier.set(null as String?)
+    relocate("gg.essential.vigilance", "com.github.hul1an.maxpenisclient.vigilance")
+    // vigilance dependencies
+    relocate("gg.essential.elementa", "com.github.hul1an.maxpenisclient.elementa")
+    // elementa dependencies
+    relocate("gg.essential.universalcraft", "com.github.hul1an.maxpenisclient.universalcraft")
+}
+tasks.register("reobfJar") {
+    dependsOn(tasks.shadowJar)
 }
 
 tasks.assemble.get().dependsOn(tasks.remapJar)
