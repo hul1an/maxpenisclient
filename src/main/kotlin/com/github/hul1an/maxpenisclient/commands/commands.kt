@@ -1,6 +1,6 @@
 package com.github.hul1an.maxpenisclient.commands
 
-
+import com.github.hul1an.maxpenisclient.utils.Rotations
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.command.CommandBase
@@ -9,6 +9,8 @@ import net.minecraft.event.ClickEvent
 import net.minecraft.init.Blocks
 import net.minecraft.util.ChatComponentText
 import net.minecraft.util.ChatStyle
+import net.minecraft.util.Vec3
+import net.minecraft.util.Vec3i
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.FMLCommonHandler
@@ -51,6 +53,27 @@ class CrashCommand: CommandBase() {
 
     override fun getCommandAliases(): List<String> {
         return listOf("dontcrashme")
+    }
+
+}
+
+class RotationTest: CommandBase() {
+    private val rotation = Rotations()
+    override fun getCommandName(): String {
+        return "rotateme"
+    }
+
+    override fun getCommandUsage(sender: ICommandSender?): String {
+        return ""
+    }
+
+    override fun processCommand(sender: ICommandSender?, args: Array<out String>?) {
+        val origin = Vec3(0.0, 0.0, 0.0)
+        rotation.rotateTo(origin)
+    }
+
+    override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean {
+        return true
     }
 
 }

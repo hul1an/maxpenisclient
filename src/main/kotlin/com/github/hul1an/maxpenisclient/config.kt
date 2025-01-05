@@ -14,7 +14,7 @@ import cc.polyfrost.oneconfig.libs.universal.UKeyboard
 
 class MyConfig : Config(Mod("maxpenisaddons", ModType.SKYBLOCK), "maxpenisConfig.json") {
     @KeyBind(name = "Highlite Miner Keybind", category = "Rift", subcategory = "mountaintop")
-    lateinit var minerKeyBind: OneKeyBind // had to move ts to the top because kotlin is strange
+    lateinit var minerKeyBind: OneKeyBind // had to move ts to the top because oneconfig in kotlin is strange
 
     init {
         initialize()
@@ -36,6 +36,6 @@ class MyConfig : Config(Mod("maxpenisaddons", ModType.SKYBLOCK), "maxpenisConfig
     var highliteMinerMainToggle: Boolean = false
     @Dropdown(name = "Final Age", size = OptionSize.DUAL, options = ["Youngite", "Timeite", "Obsolite"], category = "Rift", subcategory = "mountaintop")
     var finalAge = 0
-    @Slider(name = "Rotation Smoothness", min = 100f, max = 300f, step = 50, category = "Rift", subcategory = "mountaintop")
-    var rotationSmoothness = 150f
+    @Slider(name = "Rotation Smoothness", min = 10f, max = 50f, step = 5, category = "Rift", subcategory = "mountaintop")
+    var rotationSmoothness = 20f
 }

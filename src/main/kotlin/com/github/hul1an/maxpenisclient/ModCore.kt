@@ -2,6 +2,7 @@ package com.github.hul1an.maxpenisclient
 
 
 import com.github.hul1an.maxpenisclient.commands.CrashCommand
+import com.github.hul1an.maxpenisclient.commands.RotationTest
 import net.minecraft.client.Minecraft
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.client.event.ClientChatReceivedEvent
@@ -32,6 +33,7 @@ class ModCore {
         MinecraftForge.EVENT_BUS.register(MyEventHandlerClass())
         MinecraftForge.EVENT_BUS.register(this)
         ClientCommandHandler.instance.registerCommand(CrashCommand())
+        ClientCommandHandler.instance.registerCommand(RotationTest())
 
 
         try {
