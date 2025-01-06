@@ -12,6 +12,10 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.Cancelable
 import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import cc.polyfrost.oneconfig.config.core.OneKeyBind
+import com.github.hul1an.maxpenisclient.features.HighliteMacro
+import net.minecraftforge.fml.common.gameevent.InputEvent
+import org.lwjgl.input.Keyboard
 
 
 @Mod(
@@ -23,15 +27,17 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class ModCore {
 
-    var maxpenisConfig: MyConfig? = null
+    val config = MyConfig()
+    val highliteMacro = HighliteMacro()
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
 
-        maxpenisConfig = MyConfig()
+
 
         MinecraftForge.EVENT_BUS.register(MyEventHandlerClass())
         MinecraftForge.EVENT_BUS.register(this)
+        MinecraftForge.EVENT_BUS.register(KeyBindHandler(config.minerKeyBind, highliteMacro))
         ClientCommandHandler.instance.registerCommand(CrashCommand())
         ClientCommandHandler.instance.registerCommand(RotationTest())
 
@@ -84,7 +90,17 @@ class MyEventHandlerClass {
 @Cancelable
 class CheeseEvent(val totalCheeseCount: Int) : Event()
 
+class KeyBindHandler(private val minerKeyBind: OneKeyBind, private val highliteMacro: HighliteMacro) {
 
+    @SubscribeEvent
+    fun onKeyInput(event: InputEvent.KeyInputEvent) {
+        if (Keyboard.getEventKeyState() && minerKeyBind.isActive) {
+            // Handle the key press event
+            println("Miner key bind pressed")
+            highliteMacro.toggle()
+        }
+    }
+}
 
 
 

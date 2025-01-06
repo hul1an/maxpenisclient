@@ -19,7 +19,6 @@ class MyConfig : Config(Mod("maxpenisaddons", ModType.SKYBLOCK), "maxpenisConfig
     init {
         initialize()
         minerKeyBind = OneKeyBind(UKeyboard.KEY_B)
-        registerKeyBind(minerKeyBind) { println("Look mom, a keybind!") }
         addDependency("subSwitch") { masterSwitch }
         addDependency("finalAge") { highliteMinerMainToggle }
         addDependency("rotationSmoothness") { highliteMinerMainToggle }
