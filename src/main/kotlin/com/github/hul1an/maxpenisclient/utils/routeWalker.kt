@@ -69,6 +69,7 @@ class RouteWalker {
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
         if (this.Enabled) {
+            println("onRenderWorld called, state: $state")
             if (this.state == MacroStates.WALKING) {
                 if (Minecraft.getMinecraft().currentScreen != null) {
                     movementHelper.stopMovement()
@@ -109,7 +110,7 @@ class RouteWalker {
                             Rotations.rotateTo(vec3PointLook)
                         }
                     } catch (error: Exception) {
-                        // Handle error
+                        println("error lebrobro")
                     }
                 }
             }
@@ -122,10 +123,14 @@ class RouteWalker {
 
     fun toggle() {
         this.Enabled = !this.Enabled
-        var index = this.getClosestIndex()
-        this.currentIndexLook = index
-        this.currentIndexWalk = index
-        if(!this.Enabled){
+        if (this.Enabled) {
+            this.state = MacroStates.WALKING
+            var index = this.getClosestIndex()
+            this.currentIndexLook = index
+            this.currentIndexWalk = index
+        }
+        else {
+            this.state = MacroStates.WAITING
             Rotations.stopRotate()
             movementHelper.stopMovement()
         }
@@ -218,6 +223,17 @@ class RouteWalker {
         println("Saving areas to file: $jsonString")
         println("File path: $filePath")
         File(filePath).writeText(jsonString)
+    }
+
+    fun loadPathFromJson(areaName: String): Array<Array<Double>>? {
+        val filePath = "D:/maxpenisclient/src/main/kotlin/com/github/hul1an/maxpenisclient/utils/locations.json"
+        val jsonString = File(filePath).readText()
+        val areas: List<Area> = Json.decodeFromString(jsonString)
+
+        val area = areas.find { it.name == areaName } ?: return null
+        return area.waypoints.map { waypoint ->
+            arrayOf(waypoint.x, waypoint.y, waypoint.z)
+        }.toTypedArray()
     }
 
 

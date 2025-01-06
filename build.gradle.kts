@@ -1,4 +1,6 @@
 import org.apache.commons.lang3.SystemUtils
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     idea
@@ -207,3 +209,7 @@ tasks.register("reobfJar") {
 
 tasks.assemble.get().dependsOn(tasks.remapJar)
 
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    apiVersion.set(KotlinVersion.KOTLIN_1_8)
+}

@@ -39,6 +39,8 @@ class ModCore {
         MinecraftForge.EVENT_BUS.register(MyEventHandlerClass())
         MinecraftForge.EVENT_BUS.register(this)
         MinecraftForge.EVENT_BUS.register(KeyBindHandler(config.minerKeyBind, highliteMacro))
+        MinecraftForge.EVENT_BUS.register(highliteMacro)
+        MinecraftForge.EVENT_BUS.register(routeWalker)
         ClientCommandHandler.instance.registerCommand(CrashCommand())
         ClientCommandHandler.instance.registerCommand(RotationTest())
         ClientCommandHandler.instance.registerCommand(AddWaypointCommand(routeWalker))
@@ -88,6 +90,8 @@ class MyEventHandlerClass {
             event.isCanceled = true
         }
     }
+
+
 }
 
 @Cancelable
