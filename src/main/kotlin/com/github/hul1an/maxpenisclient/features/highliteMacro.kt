@@ -66,11 +66,39 @@ class HighliteMacro {
             }
 
             if (this.Enabled) {
+            //check current location, if current area == Rift & player is within 5 blocks of a miningWalkerRoute waypoint,
+                    // start routewalker on whatever route it is
+
+            //else if current area == hub || riftCollapse == true,
+                //send chat /warp wizard
+                    //if riftCollapse == true set it to false
+                //start route walker on wizardToRift
+                //wizardToRift ends in world change to Rift
+
+            //once current world == rift and current coords == riftToEye 0
+                //start riftToEye route
+
+            //once riftToEye is finished, interact with teleport eye
+
+            //once coords are within 3 blocks of eyeToMine
+                //start eyeToMine
+
+            //once eyeToMine is finished, pathfinding is done and the player is at the mountaintop
+
+            //start miningWalkerRoute, stop walker if a wayppoint has >1 glass pane within 4 blocks of waypoint
+                //if there is a player within 4 blocks of waypoint, move to next
+                //else initiate miner until 0 glass panes then move to next
+
+            //once miningWalkerRoute is finished, initiate miningWalkerReturnRoute
+                //once return is finished start miningWalkerRoute again
+
+            //if chat message recieved contains "Rift is Collapsing"
+                // riftCollapse = true
 
 
             }
-
-            if (/*location.currentArea != Island.TheRift && */!moving2Mountaintop) {
+            /*
+            if (location.currentArea != Island.TheRift && !moving2Mountaintop) {
                 //sendChatMessage("/warp wizard")
                 moving2Mountaintop = true
 
@@ -84,28 +112,13 @@ class HighliteMacro {
                 }
 
 
-            }
+            }*/
         }
     }
 
-        //todo
 
-        //register when the highlite macro keybind in config is pressed and call toggle function: done
-        //when enabled = true start bot
-        //warp wizard
-        //enter rift
-        //use waypoints to move to eye
-        //use waypoints to move to start waypoint for mining
-        //if a vein has a player in it, go to it but do not mine, simply rotate and move to next waypoint
-        //start mining/aging
-        //move to next waypoint when vein depleted
-        //when 32x youngite start mining timeite
-        //when 32x timite start mining obsolite
-        //when 16x obsolite craft highlite
-        //start mining youngite again
-        //when final vein waypoint is reached, start new path to the bottom
-        //when chat message Rift is Collapsing! is recieved, stop bot
-        //when enabled = false stop bot
+
+
 
         fun toggle() {
             System.out.println("toggled")

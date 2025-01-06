@@ -1,6 +1,5 @@
 package com.github.hul1an.maxpenisclient.utils
 
-
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.util.BlockPos
@@ -14,7 +13,6 @@ class MovementHelper {
     }
 
     val mc = Minecraft.getMinecraft()
-    val Player = mc.thePlayer
 
     fun setKey(key: String, down: Boolean) {
         when (key) {
@@ -41,7 +39,6 @@ class MovementHelper {
             "sprint" -> mc.gameSettings.keyBindSprint.isKeyDown
             else -> false
         }
-
     }
 
     fun onTickLeftClick() {
@@ -49,20 +46,35 @@ class MovementHelper {
     }
 
     fun setKeysBasedOnYaw(yaw: Double, jump: Boolean = true) {
-        this.stopMovement()
-        if (yaw >= -50.0 && yaw <= 50.0) {
-            this.setKey("w", true)
+        try {
+            println("setKeysBasedOnYaw called with yaw: $yaw, jump: $jump")
+            this.stopMovement()
+
+            if (yaw >= -50.0 && yaw <= 50.0) {
+                this.setKey("w", true)
+            }
+            if (yaw >= -135.5 && yaw <= -7.0) {
+                this.setKey("a", true)
+            }
+            if (yaw >= 7.0 && yaw <= 135.5) {
+                this.setKey("d", true)
+            }
+            if (yaw <= -135.5 || yaw >= 135.5) {
+                this.setKey("s", true)
+            }
+
+            val player = mc.thePlayer
+            if (player != null) {
+                val shouldJump = abs(player.motionX) + abs(player.motionZ) < 0.02 && this.cooldown.hasReached(500) && jump && UtilsClass().playerIsCollided()
+                println("Setting space key: $shouldJump")
+                this.setKey("space", shouldJump)
+            } else {
+                println("Player instance is null")
+            }
+        } catch (e: Exception) {
+            println("Error in setKeysBasedOnYaw: ${e.message}")
+            e.printStackTrace()
         }
-        if (yaw >= -135.5 && yaw <= -7.0) {
-            this.setKey("a", true)
-        }
-        if (yaw >= 7.0 && yaw <= 135.5) {
-            this.setKey("d", true)
-        }
-        if (yaw <= -135.5 || yaw >= 135.5) {
-            this.setKey("s", true)
-        }
-        this.setKey("space", (abs(Player.motionX) + abs(Player.motionZ) < 0.02 && this.cooldown.hasReached(500) && jump && UtilsClass().playerIsCollided()))
     }
 
     fun setKeysForStraightLine(yaw: Double, jump: Boolean = true) {
@@ -97,7 +109,12 @@ class MovementHelper {
                 this.setKey("d", true)
             }
         }
-        this.setKey("space", Player.isInWater || (abs(Player.motionX) + abs(Player.motionZ) < 0.02 && this.cooldown.hasReached(500) && jump && UtilsClass().playerIsCollided()))
+        val player = mc.thePlayer
+        if (player != null) {
+            this.setKey("space", player.isInWater || (abs(player.motionX) + abs(player.motionZ) < 0.02 && this.cooldown.hasReached(500) && jump && UtilsClass().playerIsCollided()))
+        } else {
+            println("Player instance is null")
+        }
     }
 
     fun setCooldown() {
@@ -136,8 +153,4 @@ class MovementHelper {
 
         return points
     }
-
-// holy skid session im so tired i have no clue if any of this works thanks github copilot ily
-
-
 }

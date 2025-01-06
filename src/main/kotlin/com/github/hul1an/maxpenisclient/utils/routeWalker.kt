@@ -6,12 +6,13 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.minecraft.client.Minecraft
+import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.common.MinecraftForge
 import java.io.File
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 val scheduler = Executors.newScheduledThreadPool(1)
 
@@ -21,11 +22,7 @@ data class Waypoint(val name: String, val x: Double, val y: Double, val z: Doubl
 @Serializable
 data class Area(val name: String, val waypoints: MutableList<Waypoint>)
 
-
-
 class RouteWalker {
-
-
 
     enum class MacroStates {
         WALKING,
@@ -44,7 +41,7 @@ class RouteWalker {
     private var loadingCords: Boolean
     private var stopOnEnd: Boolean
     private var rotationTime: Int
-    private var callBackActions: Array<Any>
+    private var callBackActions: Array<() -> Unit>
     private var state: MacroStates
     private var currentIndexWalk: Int
     private var currentIndexLook: Int
@@ -63,13 +60,24 @@ class RouteWalker {
         this.loadingCords = false
         this.rotations = true
 
+        // Register to the event bus
+        MinecraftForge.EVENT_BUS.register(this)
     }
-
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
         if (this.Enabled) {
-            println("onRenderWorld called, state: $state")
+            if (this.currentIndexWalk == this.path.size) {
+                println("Reached end of path, stopping")
+                this.currentIndexWalk = 0
+                this.currentIndexLook = 2
+                this.triggerEnd()
+                this.Enabled = false
+                this.state = MacroStates.WAITING
+                Rotations.stopRotate()
+                movementHelper.stopMovement()
+                return
+            }
             if (this.state == MacroStates.WALKING) {
                 if (Minecraft.getMinecraft().currentScreen != null) {
                     movementHelper.stopMovement()
@@ -83,16 +91,19 @@ class RouteWalker {
                     var currentLook = this.path[this.currentIndexLook]
                     val distancePoint = MathUtils.distanceToPlayer(arrayOf(currentWalk[0] + 0.5, currentWalk[1] + 1.52, currentWalk[2] + 0.5))
                     if (distancePoint["distance"]!! < 6.0 && distancePoint["distanceFlat"]!! < 0.8) {
+                        println("Reached point $currentWalk, moving to next point")
                         this.currentIndexWalk += 1
                         this.currentIndexLook += 1
                         if (this.currentIndexWalk == this.path.size) {
+                            println("Reached end of path, stopping")
                             this.currentIndexWalk = 0
-                            this.currentIndexLook = 2//if (ModuleToggle.UseRouteWalkerV2Module) 2 else 0
+                            this.currentIndexLook = 2
                             this.triggerEnd()
-                            if (this.stopOnEnd) {
-                                this.toggle()
-                                return
-                            }
+                            this.Enabled = false
+                            this.state = MacroStates.WAITING
+                            Rotations.stopRotate()
+                            movementHelper.stopMovement()
+                            return
                         }
                         if (this.currentIndexLook >= this.path.size) {
                             this.currentIndexLook = this.path.size - 1
@@ -105,34 +116,36 @@ class RouteWalker {
                         val vec3PointLook = Vec3(currentLook[0] + 0.5, currentLook[1] + 1.52, currentLook[2] + 0.5)
                         val vec3PointWalk = Vec3(currentWalk[0] + 0.5, currentWalk[1] + 1.0, currentWalk[2] + 0.5)
                         val angles = MathUtils.calculateAngles(vec3PointWalk)
-                        movementHelper.setKeysBasedOnYaw(angles.first) //first is yaw
+                        movementHelper.setKeysBasedOnYaw(angles.first) // first is yaw
                         if (this.rotations) {
+                            println("Rotating to $vec3PointLook")
                             Rotations.rotateTo(vec3PointLook)
+                        } else {
+                            println("Rotations are disabled")
                         }
                     } catch (error: Exception) {
-                        println("error lebrobro")
+                        println("Error during movement: ${error.message}")
+                        error.printStackTrace()
                     }
                 }
             }
         }
     }
 
-
-
-
-
     fun toggle() {
         this.Enabled = !this.Enabled
+        println("RouteWalker toggled, Enabled: $Enabled")
         if (this.Enabled) {
             this.state = MacroStates.WALKING
-            var index = this.getClosestIndex()
+            val index = this.getClosestIndex()
             this.currentIndexLook = index
             this.currentIndexWalk = index
-        }
-        else {
+            println("RouteWalker enabled, starting at index $index")
+        } else {
             this.state = MacroStates.WAITING
             Rotations.stopRotate()
             movementHelper.stopMovement()
+            println("RouteWalker disabled")
         }
     }
 
@@ -147,6 +160,7 @@ class RouteWalker {
             }
             this.path = path
         }
+        println("Path set with ${this.path.size} points")
     }
 
     fun getClosestIndex(): Int {
@@ -155,13 +169,14 @@ class RouteWalker {
         var closestDistance = Double.MAX_VALUE
 
         this.path.forEachIndexed { index, point ->
-            val distance = MathUtils.distanceToPlayer(point as Array<Double>)["distance"] ?: Double.MAX_VALUE
+            val distance = MathUtils.distanceToPlayer(point)["distance"] ?: Double.MAX_VALUE
             if (closest == null || distance < closestDistance) {
                 closest = point
                 closestIndex = index
                 closestDistance = distance
             }
         }
+        println("Closest index to player: $closestIndex")
         return closestIndex
     }
 
@@ -187,19 +202,18 @@ class RouteWalker {
 
     fun triggerEnd() {
         this.callBackActions.forEach { action ->
-            action
+            action()
         }
         this.callBackActions = emptyArray()
     }
 
-
-    //waypoint handling stuff, thanks chatgpt :thumbsup:
     fun addWaypoint(areaName: String, waypoint: Waypoint) {
         val area = areas.find { it.name == areaName } ?: Area(areaName, mutableListOf()).also { areas.add(it) }
         area.waypoints.add(waypoint)
         println("Waypoint added: $waypoint")
         saveAreasToFile()
     }
+
     fun removeWaypoint(areaName: String, waypointName: String): Boolean {
         val area = areas.find { it.name == areaName }
         return if (area != null) {
@@ -235,11 +249,4 @@ class RouteWalker {
             arrayOf(waypoint.x, waypoint.y, waypoint.z)
         }.toTypedArray()
     }
-
-
 }
-
-
-
-
-
