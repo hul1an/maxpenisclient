@@ -1,8 +1,6 @@
 package com.github.hul1an.maxpenisclient
 
 
-import com.github.hul1an.maxpenisclient.commands.CrashCommand
-import com.github.hul1an.maxpenisclient.commands.RotationTest
 import net.minecraft.client.Minecraft
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.client.event.ClientChatReceivedEvent
@@ -13,7 +11,9 @@ import net.minecraftforge.fml.common.eventhandler.Cancelable
 import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import cc.polyfrost.oneconfig.config.core.OneKeyBind
+import com.github.hul1an.maxpenisclient.commands.*
 import com.github.hul1an.maxpenisclient.features.HighliteMacro
+import com.github.hul1an.maxpenisclient.utils.RouteWalker
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import org.lwjgl.input.Keyboard
 
@@ -29,6 +29,7 @@ class ModCore {
 
     val config = MyConfig()
     val highliteMacro = HighliteMacro()
+    val routeWalker = RouteWalker()
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
@@ -40,6 +41,8 @@ class ModCore {
         MinecraftForge.EVENT_BUS.register(KeyBindHandler(config.minerKeyBind, highliteMacro))
         ClientCommandHandler.instance.registerCommand(CrashCommand())
         ClientCommandHandler.instance.registerCommand(RotationTest())
+        ClientCommandHandler.instance.registerCommand(AddWaypointCommand(routeWalker))
+        ClientCommandHandler.instance.registerCommand(RemoveWaypointCommand(routeWalker))
 
 
         try {

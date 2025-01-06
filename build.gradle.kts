@@ -7,6 +7,7 @@ plugins {
     id("dev.architectury.architectury-pack200") version "0.1.3"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     kotlin("jvm") version "2.0.0"
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 //Constants:
@@ -90,6 +91,8 @@ dependencies {
     implementation("gg.essential:elementa:676")
     implementation("gg.essential:vigilance:306")
     modImplementation("gg.essential:universalcraft-1.8.9-forge:369")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
     // Basic OneConfig dependencies for legacy versions. See OneConfig example mod for more info
     compileOnly("cc.polyfrost:oneconfig-1.8.9-forge:0.2.2-alpha+") // Should not be included in jar

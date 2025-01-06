@@ -1,5 +1,6 @@
 package com.github.hul1an.maxpenisclient.commands
 
+import com.github.hul1an.maxpenisclient.utils.RouteWalker
 import com.github.hul1an.maxpenisclient.utils.Rotations
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
@@ -22,7 +23,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.apache.logging.log4j.LogManager
 import kotlin.reflect.KParameter
 
-
+import com.github.hul1an.maxpenisclient.utils.Waypoint
 
 
 class CrashCommand: CommandBase() {
@@ -77,4 +78,69 @@ class RotationTest: CommandBase() {
     }
 
 }
+
+
+class AddWaypointCommand(private val routeWalker: RouteWalker) : CommandBase() {
+    override fun getCommandName(): String {
+        return "addwaypoint"
+    }
+
+    override fun getCommandUsage(sender: ICommandSender?): String {
+        return "/addwaypoint <area> <name> <x> <y> <z>"
+    }
+
+    override fun processCommand(sender: ICommandSender?, args: Array<out String>?) {
+        if (args != null && args.size == 5) {
+            val areaName = args[0]
+            val waypointName = args[1]
+            val x = args[2].toDoubleOrNull()
+            val y = args[3].toDoubleOrNull()
+            val z = args[4].toDoubleOrNull()
+
+            if (x != null && y != null && z != null) {
+                val waypoint = Waypoint(waypointName, x, y, z)
+                routeWalker.addWaypoint(areaName, waypoint)
+                sender?.addChatMessage(ChatComponentText("Waypoint added: $waypointName at ($x, $y, $z) in area $areaName"))
+            } else {
+                sender?.addChatMessage(ChatComponentText("Invalid coordinates"))
+            }
+        } else {
+            sender?.addChatMessage(ChatComponentText("Usage: ${getCommandUsage(sender)}"))
+        }
+    }
+
+    override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean {
+        return true
+    }
+}
+class RemoveWaypointCommand(private val routeWalker: RouteWalker) : CommandBase() {
+    override fun getCommandName(): String {
+        return "removewaypoint"
+    }
+
+    override fun getCommandUsage(sender: ICommandSender?): String {
+        return "/removewaypoint <area> <name>"
+    }
+
+    override fun processCommand(sender: ICommandSender?, args: Array<out String>?) {
+        if (args != null && args.size == 2) {
+            val areaName = args[0]
+            val waypointName = args[1]
+
+            if (routeWalker.removeWaypoint(areaName, waypointName)) {
+                sender?.addChatMessage(ChatComponentText("Waypoint removed: $waypointName from area $areaName"))
+            } else {
+                sender?.addChatMessage(ChatComponentText("Waypoint not found: $waypointName in area $areaName"))
+            }
+        } else {
+            sender?.addChatMessage(ChatComponentText("Usage: ${getCommandUsage(sender)}"))
+        }
+    }
+
+    override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean {
+        return true
+    }
+}
+
+
 
