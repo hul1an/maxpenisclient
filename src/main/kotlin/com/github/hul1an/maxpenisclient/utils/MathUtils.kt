@@ -86,7 +86,7 @@ class MathUtilsClass {
         )
     }
 
-    private fun calculateDistance(p1: Array<Double>, p2: Array<Double>): Map<String, Double> {
+    fun calculateDistance(p1: Array<Double>, p2: Array<Double>): Map<String, Double> {
         val diffX = p1[0] - p2[0]
         val diffY = p1[1] - p2[1]
         val diffZ = p1[2] - p2[2]

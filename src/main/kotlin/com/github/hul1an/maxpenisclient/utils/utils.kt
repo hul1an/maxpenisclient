@@ -1,5 +1,6 @@
 package com.github.hul1an.maxpenisclient.utils
 
+import cc.polyfrost.oneconfig.libs.universal.ChatColor.Companion.FORMATTING_CODE_PATTERN
 import net.minecraft.client.Minecraft
 import net.minecraft.network.Packet
 import net.minecraft.util.AxisAlignedBB
@@ -83,6 +84,37 @@ class UtilsClass {
         return boxes
     }
 
+    /**
+     * Profiles the specified function with the specified string as profile section name.
+     * Uses the minecraft profiler. skidded from Odin
+     *
+     * @param name The name of the profile section.
+     * @param func The code to profile.
+     */
+    inline fun profile(name: String, func: () -> Unit) {
+        startProfile(name)
+        func()
+        endProfile()
+    }
+    /**
+     * Starts a minecraft profiler section with the specified name + "Maxpenis: ".
+     * */
+    fun startProfile(name: String) {
+        mc.mcProfiler.startSection("Maxpenis: $name")
+    }
+
+    /**
+     * Ends the current minecraft profiler section.
+     */
+    fun endProfile() {
+        mc.mcProfiler.endSection()
+    }
+
+
+
+
+
+    val mc: Minecraft = Minecraft.getMinecraft()
 
 
 }
