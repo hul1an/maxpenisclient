@@ -52,6 +52,7 @@ class MovementHelper {
 
             if (yaw >= -50.0 && yaw <= 50.0) {
                 this.setKey("w", true)
+                this.setKey("sprint", true)
             }
             if (yaw >= -135.5 && yaw <= -7.0) {
                 this.setKey("a", true)
@@ -126,6 +127,7 @@ class MovementHelper {
         this.setKey("a", false)
         this.setKey("s", false)
         this.setKey("d", false)
+        this.setKey("sprint", false)
     }
 
     fun unpressKeys() {

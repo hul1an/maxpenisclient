@@ -55,7 +55,7 @@ class RouteWalker {
         this.currentIndexLook = 0
         this.state = MacroStates.WAITING
         this.callBackActions = emptyArray()
-        this.rotationTime = 200
+        this.rotationTime = 300
         this.stopOnEnd = false
         this.loadingCords = false
         this.rotations = true
