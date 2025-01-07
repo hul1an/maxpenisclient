@@ -1,7 +1,6 @@
 package com.github.hul1an.maxpenisclient.utils
 
-import com.github.hul1an.maxpenisclient.clock.Executor
-import com.github.hul1an.maxpenisclient.clock.Executor.Companion.register
+import kotlinx.coroutines.*
 import net.minecraft.client.Minecraft
 import net.minecraft.client.network.NetHandlerPlayClient
 import net.minecraft.network.Packet
@@ -12,30 +11,34 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.network.FMLNetworkEvent
 import net.minecraftforge.event.world.WorldEvent
 
-@OptIn(ExperimentalStdlibApi::class)
+@OptIn(kotlin.ExperimentalStdlibApi::class)
 object LocationUtils {
 
     private var isOnHypixel: Boolean = false
     var isInSkyblock: Boolean = false
 
+
     var currentArea: Island = Island.Unknown
     var kuudraTier: Int = 0
 
+    private val scope = CoroutineScope(Dispatchers.Default + Job())
+
     init {
-        Executor(500, "LocationUtils") {
-            if (!isInSkyblock)
-                isInSkyblock = isOnHypixel && mc.theWorld?.scoreboard?.getObjectiveInDisplaySlot(1)?.let { cleanSB(it.displayName).contains("SKYBLOCK") } == true
+        scope.launch {
+            while (isActive) {
+                delay(500)
+                if (!isInSkyblock)
+                    isInSkyblock = isOnHypixel && mc.theWorld?.scoreboard?.getObjectiveInDisplaySlot(1)?.let { cleanSB(it.displayName).contains("SKYBLOCK") } == true
 
-            if (currentArea.isArea(Island.Kuudra) && kuudraTier == 0)
-                sidebarLines.find { cleanLine(it).contains("Kuudra's Hollow (") }?.let {
-                    kuudraTier = it.substringBefore(")").lastOrNull()?.digitToIntOrNull() ?: 0 }
+                if (currentArea.isArea(Island.Kuudra) && kuudraTier == 0)
+                    sidebarLines.find { cleanLine(it).contains("Kuudra's Hollow (") }?.let {
+                        kuudraTier = it.substringBefore(")").lastOrNull()?.digitToIntOrNull() ?: 0 }
 
-            if (currentArea.isArea(Island.Unknown)) {
-                currentArea = getArea()
-                println("Updated currentArea: $currentArea")
+                if (currentArea.isArea(Island.Unknown)) currentArea = getArea()
+
+
             }
-
-        }.register()
+        }
     }
 
     @SubscribeEvent
@@ -44,10 +47,12 @@ object LocationUtils {
         isInSkyblock = false
         currentArea = Island.Unknown
         kuudraTier = 0
+
     }
 
     @SubscribeEvent
     fun onWorldChange(event: WorldEvent.Unload) {
+
         isInSkyblock = false
         kuudraTier = 0
         currentArea = Island.Unknown
@@ -77,10 +82,10 @@ object LocationUtils {
                     it?.displayName?.unformattedText?.startsWith("Dungeon: ") == true
         }?.displayName?.formattedText
 
-        println("Detected area: $area")
-
         return Island.entries.firstOrNull { area?.contains(it.displayName, true) == true } ?: Island.Unknown
     }
+
+
 }
 
 open class PacketEvent(val packet: Packet<*>) : Event() {
@@ -91,3 +96,4 @@ open class PacketEvent(val packet: Packet<*>) : Event() {
     @Cancelable
     class Send(packet: Packet<*>) : PacketEvent(packet)
 }
+

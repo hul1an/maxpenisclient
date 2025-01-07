@@ -47,7 +47,7 @@ class MovementHelper {
 
     fun setKeysBasedOnYaw(yaw: Double, jump: Boolean = true) {
         try {
-            println("setKeysBasedOnYaw called with yaw: $yaw, jump: $jump")
+           // println("setKeysBasedOnYaw called with yaw: $yaw, jump: $jump")
             this.stopMovement()
 
             if (yaw >= -50.0 && yaw <= 50.0) {
@@ -66,7 +66,7 @@ class MovementHelper {
             val player = mc.thePlayer
             if (player != null) {
                 val shouldJump = abs(player.motionX) + abs(player.motionZ) < 0.02 && this.cooldown.hasReached(500) && jump && UtilsClass().playerIsCollided()
-                println("Setting space key: $shouldJump")
+               // println("Setting space key: $shouldJump")
                 this.setKey("space", shouldJump)
             } else {
                 println("Player instance is null")

@@ -97,10 +97,10 @@ class UtilsClass {
         endProfile()
     }
     /**
-     * Starts a minecraft profiler section with the specified name + "Maxpenis: ".
+     * Starts a minecraft profiler section with the specified name + "maxpenis: ".
      * */
     fun startProfile(name: String) {
-        mc.mcProfiler.startSection("Maxpenis: $name")
+        mc.mcProfiler.startSection("mxxpenis: $name")
     }
 
     /**

@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import cc.polyfrost.oneconfig.config.core.OneKeyBind
 import com.github.hul1an.maxpenisclient.commands.*
 import com.github.hul1an.maxpenisclient.features.HighliteMacro
+import com.github.hul1an.maxpenisclient.utils.LocationUtils
 import com.github.hul1an.maxpenisclient.utils.RouteWalker
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import org.lwjgl.input.Keyboard
@@ -31,6 +32,7 @@ class ModCore {
     val highliteMacro = HighliteMacro()
     val routeWalker = RouteWalker()
 
+
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
 
@@ -41,8 +43,10 @@ class ModCore {
         MinecraftForge.EVENT_BUS.register(KeyBindHandler(config.minerKeyBind, highliteMacro))
         MinecraftForge.EVENT_BUS.register(highliteMacro)
         MinecraftForge.EVENT_BUS.register(routeWalker)
+        MinecraftForge.EVENT_BUS.register(LocationUtils)
         ClientCommandHandler.instance.registerCommand(CrashCommand())
         ClientCommandHandler.instance.registerCommand(RotationTest())
+        ClientCommandHandler.instance.registerCommand(TestRouteWalkerRoute(routeWalker))
         ClientCommandHandler.instance.registerCommand(AddWaypointCommand(routeWalker))
         ClientCommandHandler.instance.registerCommand(RemoveWaypointCommand(routeWalker))
 

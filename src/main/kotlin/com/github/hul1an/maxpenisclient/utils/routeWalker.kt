@@ -68,7 +68,7 @@ class RouteWalker {
     fun onRenderWorld(event: RenderWorldLastEvent) {
         if (this.Enabled) {
             if (this.currentIndexWalk == this.path.size) {
-                println("Reached end of path, stopping")
+                //println("Reached end of path, stopping")
                 this.currentIndexWalk = 0
                 this.currentIndexLook = 2
                 this.triggerEnd()
@@ -91,7 +91,7 @@ class RouteWalker {
                     var currentLook = this.path[this.currentIndexLook]
                     val distancePoint = MathUtils.distanceToPlayer(arrayOf(currentWalk[0] + 0.5, currentWalk[1] + 1.52, currentWalk[2] + 0.5))
                     if (distancePoint["distance"]!! < 6.0 && distancePoint["distanceFlat"]!! < 0.8) {
-                        println("Reached point $currentWalk, moving to next point")
+                        //println("Reached point $currentWalk, moving to next point")
                         this.currentIndexWalk += 1
                         this.currentIndexLook += 1
                         if (this.currentIndexWalk == this.path.size) {
@@ -118,7 +118,7 @@ class RouteWalker {
                         val angles = MathUtils.calculateAngles(vec3PointWalk)
                         movementHelper.setKeysBasedOnYaw(angles.first) // first is yaw
                         if (this.rotations) {
-                            println("Rotating to $vec3PointLook")
+                            //println("Rotating to $vec3PointLook")
                             Rotations.rotateTo(vec3PointLook)
                         } else {
                             println("Rotations are disabled")
@@ -134,18 +134,18 @@ class RouteWalker {
 
     fun toggle() {
         this.Enabled = !this.Enabled
-        println("RouteWalker toggled, Enabled: $Enabled")
+        //println("RouteWalker toggled, Enabled: $Enabled")
         if (this.Enabled) {
             this.state = MacroStates.WALKING
             val index = this.getClosestIndex()
             this.currentIndexLook = index
             this.currentIndexWalk = index
-            println("RouteWalker enabled, starting at index $index")
+            //println("RouteWalker enabled, starting at index $index")
         } else {
             this.state = MacroStates.WAITING
             Rotations.stopRotate()
             movementHelper.stopMovement()
-            println("RouteWalker disabled")
+            //println("RouteWalker disabled")
         }
     }
 
@@ -160,7 +160,7 @@ class RouteWalker {
             }
             this.path = path
         }
-        println("Path set with ${this.path.size} points")
+        //println("Path set with ${this.path.size} points")
     }
 
     fun getClosestIndex(): Int {
@@ -176,7 +176,7 @@ class RouteWalker {
                 closestDistance = distance
             }
         }
-        println("Closest index to player: $closestIndex")
+        //println("Closest index to player: $closestIndex")
         return closestIndex
     }
 

@@ -2,20 +2,40 @@ package com.github.hul1an.maxpenisclient.features
 
 import com.github.hul1an.maxpenisclient.MyConfig
 import com.github.hul1an.maxpenisclient.utils.*
+import com.github.hul1an.maxpenisclient.utils.RouteWalker.MacroStates
 import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
+import net.minecraft.init.Blocks
 import net.minecraft.init.Items
 import net.minecraft.inventory.ContainerChest
+import net.minecraft.item.Item
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
+import net.minecraft.util.Vec3i
 import net.minecraftforge.client.event.ClientChatReceivedEvent
+import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.util.Timer
 import java.util.TimerTask
 
 class HighliteMacro {
+
+    enum class MacroStates {
+        WALKING,
+        WAITING,
+        MINING,
+        RETURNING,
+        WARPING
+    }
+    enum class MacroActions {
+        WALKING,
+        WAITING,
+        MINING,
+        RETURNING
+    }
+
 
 
     val config = MyConfig()
@@ -37,7 +57,17 @@ class HighliteMacro {
         doubleArrayOf(0.5, 0.5, 0.01),
         doubleArrayOf(0.5, 0.5, 0.99)
     )
+    private var state: MacroStates
+    private var action: MacroActions
+
+    private var returnTimer = TimeHelper()
+    private var menuCooldown = TimeHelper()
+    private var interactWithNPCTimer = TimeHelper()
+
+
     var riftCollapse = false
+    var infused = false
+    //var warpedToWizard = false
 
 
 
@@ -51,6 +81,13 @@ class HighliteMacro {
             2 -> this.finalAge = 10 //obsolite
         }
 
+        this.state = MacroStates.WAITING
+        this.action = MacroActions.WAITING
+
+        MinecraftForge.EVENT_BUS.register((this))
+
+
+
 
     }
 
@@ -59,18 +96,44 @@ class HighliteMacro {
     fun onClientTick(event: TickEvent.ClientTickEvent) {
         if (event.phase == TickEvent.Phase.START) {
             if (!this.Enabled) {
-
                 return
             }
 
-
-
             if (Minecraft.getMinecraft().currentScreen != null) {
-                println("Current screen is not null, stopping movement")
+                //println("Current screen is not null, stopping movement")
                 movementHelper.stopMovement()
                 movementHelper.setKey("shift", false)
                 movementHelper.setKey("leftclick", false)
+                movementHelper.setKey("sprint", false)
                 rotations.stopRotate()
+
+                if (location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 1.0) && this.state == MacroStates.RETURNING){
+                    interactWithNPCTimer.reset()
+                    val currentScreen = Minecraft.getMinecraft().currentScreen
+                    if (currentScreen is GuiChest) {
+                        val currentScreen1 = currentScreen as GuiChest
+                        val container = currentScreen1.inventorySlots as ContainerChest
+                        for (i in 0 until container.lowerChestInventory.sizeInventory) {
+                            val stack = container.lowerChestInventory.getStackInSlot(i)
+                            if (stack != null) {
+                                if (stack.item == Item.getItemFromBlock(Blocks.double_plant) && stack.metadata == 1) {
+                                    if(menuCooldown.hasReached(1000)) {
+
+                                       Minecraft.getMinecraft().playerController.windowClick(
+                                           container.windowId, i, 2, 3, Minecraft.getMinecraft().thePlayer
+                                       )
+                                        menuCooldown.reset()
+                                        returnTimer.reset()
+                                        infused = true
+                                        println("clicked that yordan")
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 return
             }
 
@@ -78,20 +141,94 @@ class HighliteMacro {
 
             if (this.Enabled) {
 
-                println(location.currentArea)
+                //handles returning to mountaintop
+                if(this.state == MacroStates.RETURNING){
+                    if(isPlayerNearCoordinates(42.5, 122.0, 69.0, 2.0) && location.currentArea == Island.Hub){ ///warp wizard coordinates
+                        val path = routeWalker.loadPathFromJson("wizardToRift1")
+                        if (path != null) {
+                            if(this.returnTimer.hasReached(2000)) {
+                                routeWalker.setPath(path)
+                                routeWalker.toggle()
 
-                if (location.currentArea.isArea(Island.TheRift) && routeWalker.getClosestIndex() > 0) {
+
+                                interactWithNPCTimer.reset() //premptively reset cooldown so wizard menu doesnt insta open or some shit idk
+                            }
+                        }
+                        return
+                    }
+                    else if (!isPlayerNearCoordinates(42.5, 122.0, 69.0, 10.0) && location.currentArea != Island.TheRift && location.currentArea != Island.Unknown){
+                        if(this.returnTimer.hasReached(5000)) {
+                            println("time 2 warp")
+                            sendChatMessage("/warp wizard")
+                            this.returnTimer.reset()
+                        }
+                    }
+                    if (location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 1.0)) {
+                        if(interactWithNPCTimer.hasReached(4000)) {
+                            println("time2talk2wizzy")
+                            val currentScreen = Minecraft.getMinecraft().currentScreen
+                            if (currentScreen == null) {
+                                if(this.interactWithNpc(46.5, 122.0, 75.5)) {
+                                    println("interacted with that yordan")
+                                    this.menuCooldown.reset()
+                                    this.interactWithNPCTimer.reset()
+                                }
+                            }
+                        }
+
+                    }
+                    if (infused && location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 1.0)) {
+                        val path = routeWalker.loadPathFromJson("wizardToRift2")
+                        if (path != null) {
+                            //if(this.returnTimer.hasReached(1000)) {
+                                routeWalker.setPath(path)
+                                routeWalker.toggle()
+
+
+                            //}
+                        }
+                    }
+                    if (location.currentArea == Island.TheRift && this.state == MacroStates.RETURNING) {
+                        infused = false
+
+                        if(isPlayerNearCoordinates(-44.3, 122.0, 69.3, 1.0)) {
+                            val path = routeWalker.loadPathFromJson("riftToEye1")
+                        }
+
+                    }
+                }
+            }
+
+        }
+
+
+
+
+    }
+
+
+
+
+
+
+/*
+                if (location.currentArea.isArea(Island.TheRift) && routeWalker.getClosestIndex() > 0 && testFuck) {
                     println("Starting RouteWalker on the current route")
                     routeWalker.toggle()
-                } else if (location.currentArea.isArea(Island.Hub) || riftCollapse) {
-                    println("Warping to wizard")
-                    sendChatMessage("/warp wizard")
-                    if (riftCollapse) {
-                        riftCollapse = false
+                } else if (location.currentArea.isArea(Island.Hub) /*|| riftCollapse*/ && testFuck) {
+                    Thread.sleep(300)
+                    if(!warpedToWizard) {
+                        println("Warping to wizard")
+                        sendChatMessage("/warp wizard")
+                        var warpedToWizard = true
+                        if (riftCollapse) {
+                            riftCollapse = false
+                        }
                     }
                     val path = routeWalker.loadPathFromJson("wizardToRift1")
                     if (path != null) {
                         routeWalker.setPath(path)
+                        Thread.sleep(300)
                         routeWalker.toggle()
                     }
                 } else if (location.currentArea == Island.Hub && routeWalker.getClosestIndex() == 3 && isPlayerNearCoordinates(46.5, 122.0, 75.5, 3.0)) {
@@ -131,6 +268,7 @@ class HighliteMacro {
                     if (path != null) {
                         routeWalker.setPath(path)
                         routeWalker.toggle()
+                        warpedToWizard=false
                     }
                     if (path != null && isPlayerNearCoordinates(-43.5, 110.5, 72.5, 2.0)) {
                         routeWalker.setPath(routeWalker.loadPathFromJson("riftToEye2"))
@@ -158,10 +296,15 @@ class HighliteMacro {
                 }
             }
         }
+    }*/
+
+    fun checkPlayerCurrentIsland() { //debug
+        val currentIsland = location.currentArea
+        println("The player is currently on: $currentIsland")
     }
 
 
-    fun interactWithNpc(x: Double, y: Double, z: Double): Boolean {
+    fun interactWithNpc(x: Double, y: Double, z: Double): Boolean { //returns boolean use in if statement
         val players = Minecraft.getMinecraft().theWorld.playerEntities
         var found = false
         for (player in players) {
@@ -195,12 +338,23 @@ class HighliteMacro {
                 riftCollapse = true
         }
 
-        fun toggle() {
+        fun toggle() { //called via keybind in config i think (it works)
             System.out.println("toggled")
             this.Enabled = !this.Enabled
+
             if (this.Enabled) {
                 System.out.println("currently enabled")
+                //this.startTime = Date.now()
+                this.state = MacroStates.WAITING;
 
+                returnTimer.reset()
+                menuCooldown.reset()
+                interactWithNPCTimer.reset()
+
+                if(location.currentArea != Island.TheRift) {
+                    this.state = MacroStates.RETURNING
+                    println("state set to returning")
+                }
             }
         }
 

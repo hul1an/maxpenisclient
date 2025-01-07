@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager
 import kotlin.reflect.KParameter
 
 import com.github.hul1an.maxpenisclient.utils.Waypoint
+import net.minecraft.command.CommandXP
 
 
 class CrashCommand: CommandBase() {
@@ -140,6 +141,33 @@ class RemoveWaypointCommand(private val routeWalker: RouteWalker) : CommandBase(
     override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean {
         return true
     }
+}
+
+class TestRouteWalkerRoute(private val routeWalker: RouteWalker) : CommandBase() {
+    override fun getCommandName(): String {
+        return "testroute"
+    }
+
+    override fun getCommandUsage(sender: ICommandSender?): String {
+        return "/testroute <routeName>"
+    }
+
+    override fun processCommand(sender: ICommandSender?, args: Array<out String>?) {
+        if (args != null && args.size == 1) {
+            val routeName = args[0]
+            val path = routeWalker.loadPathFromJson(routeName)
+            routeWalker.setPath(path)
+            routeWalker.toggle()
+
+        }else {
+            sender?.addChatMessage(ChatComponentText("Usage: ${getCommandUsage(sender)}"))
+        }
+    }
+
+    override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean {
+        return true
+    }
+
 }
 
 
