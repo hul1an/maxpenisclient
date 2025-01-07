@@ -104,10 +104,9 @@ class HighliteMacro {
                 movementHelper.stopMovement()
                 movementHelper.setKey("shift", false)
                 movementHelper.setKey("leftclick", false)
-                movementHelper.setKey("sprint", false)
                 rotations.stopRotate()
 
-                if (location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 1.0) && this.state == MacroStates.RETURNING){
+                if (location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 3.0) && this.state == MacroStates.RETURNING){
                     interactWithNPCTimer.reset()
                     val currentScreen = Minecraft.getMinecraft().currentScreen
                     if (currentScreen is GuiChest) {
@@ -122,10 +121,10 @@ class HighliteMacro {
                                        Minecraft.getMinecraft().playerController.windowClick(
                                            container.windowId, i, 2, 3, Minecraft.getMinecraft().thePlayer
                                        )
-                                        menuCooldown.reset()
-                                        returnTimer.reset()
-                                        infused = true
+                                        this.menuCooldown.reset()
+                                        this.returnTimer.reset()
                                         println("clicked that yordan")
+                                        infused = true
                                         break
                                     }
                                 }
@@ -149,22 +148,21 @@ class HighliteMacro {
                             if(this.returnTimer.hasReached(2000)) {
                                 routeWalker.setPath(path)
                                 routeWalker.toggle()
-
-
+                                this.returnTimer.reset()
                                 interactWithNPCTimer.reset() //premptively reset cooldown so wizard menu doesnt insta open or some shit idk
                             }
                         }
                         return
                     }
                     else if (!isPlayerNearCoordinates(42.5, 122.0, 69.0, 10.0) && location.currentArea != Island.TheRift && location.currentArea != Island.Unknown){
-                        if(this.returnTimer.hasReached(5000)) {
+                        if(this.returnTimer.hasReached(3000)) {
                             println("time 2 warp")
                             sendChatMessage("/warp wizard")
                             this.returnTimer.reset()
                         }
                     }
-                    if (location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 1.0)) {
-                        if(interactWithNPCTimer.hasReached(4000)) {
+                    if (location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 3.0)) {
+                        if(interactWithNPCTimer.hasReached(2000)) {
                             println("time2talk2wizzy")
                             val currentScreen = Minecraft.getMinecraft().currentScreen
                             if (currentScreen == null) {
@@ -172,27 +170,34 @@ class HighliteMacro {
                                     println("interacted with that yordan")
                                     this.menuCooldown.reset()
                                     this.interactWithNPCTimer.reset()
+                                    this.returnTimer.reset()
                                 }
                             }
                         }
 
                     }
-                    if (infused && location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 1.0)) {
+                    if (infused && location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 2.0)) {
                         val path = routeWalker.loadPathFromJson("wizardToRift2")
                         if (path != null) {
-                            //if(this.returnTimer.hasReached(1000)) {
+                            if(this.returnTimer.hasReached(1000)) {
                                 routeWalker.setPath(path)
                                 routeWalker.toggle()
+                                infused = false
+                                this.returnTimer.reset()
 
-
-                            //}
+                            }
                         }
                     }
                     if (location.currentArea == Island.TheRift && this.state == MacroStates.RETURNING) {
                         infused = false
+                        if(isPlayerNearCoordinates(-44.3, 122.0, 69.3, 2.0)) {
+                            if (this.returnTimer.hasReached(2000)) {
+                                val path = routeWalker.loadPathFromJson("riftToEye1")
+                                routeWalker.setPath(path)
+                                routeWalker.toggle()
+                                this.returnTimer.reset()
 
-                        if(isPlayerNearCoordinates(-44.3, 122.0, 69.3, 1.0)) {
-                            val path = routeWalker.loadPathFromJson("riftToEye1")
+                            }
                         }
 
                     }
@@ -208,95 +213,6 @@ class HighliteMacro {
 
 
 
-
-
-
-/*
-                if (location.currentArea.isArea(Island.TheRift) && routeWalker.getClosestIndex() > 0 && testFuck) {
-                    println("Starting RouteWalker on the current route")
-                    routeWalker.toggle()
-                } else if (location.currentArea.isArea(Island.Hub) /*|| riftCollapse*/ && testFuck) {
-                    Thread.sleep(300)
-                    if(!warpedToWizard) {
-                        println("Warping to wizard")
-                        sendChatMessage("/warp wizard")
-                        var warpedToWizard = true
-                        if (riftCollapse) {
-                            riftCollapse = false
-                        }
-                    }
-                    val path = routeWalker.loadPathFromJson("wizardToRift1")
-                    if (path != null) {
-                        routeWalker.setPath(path)
-                        Thread.sleep(300)
-                        routeWalker.toggle()
-                    }
-                } else if (location.currentArea == Island.Hub && routeWalker.getClosestIndex() == 3 && isPlayerNearCoordinates(46.5, 122.0, 75.5, 3.0)) {
-                    println("Interacting with NPC")
-                    interactWithNpc(46.49, 122.0, 75.52)
-                    val currentScreen = Minecraft.getMinecraft().currentScreen
-                    if (currentScreen == null || currentScreen !is GuiChest) {
-                        println("Current screen is not a GuiChest")
-                        return
-                    } else if (currentScreen is GuiChest) {
-                        println("Current screen is a GuiChest")
-                        val currentScreen1 = currentScreen as GuiChest
-                        val container = currentScreen1.inventorySlots as ContainerChest
-                        for (i in 0 until container.lowerChestInventory.sizeInventory) {
-                            val stack = container.lowerChestInventory.getStackInSlot(i)
-                            if (stack != null) {
-                                val lore = stack.tagCompound?.getTagList("display", 10)?.getCompoundTagAt(0)?.getTagList("Lore", 8)
-                                if (lore != null) {
-                                    for (j in 0 until lore.tagCount()) {
-                                        val loreComponent = lore.getStringTagAt(j)
-                                        if (loreComponent.contains("Dimensional Infusion")) {
-                                            println("Found Dimensional Infusion, clicking the window")
-                                            Thread.sleep(300)
-                                            Minecraft.getMinecraft().playerController.windowClick(
-                                                container.windowId, i, 2, 3, Minecraft.getMinecraft().thePlayer
-                                            )
-                                            break
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else if (location.currentArea == Island.TheRift && isPlayerNearCoordinates(-44.3, 122.0, 69.3, 2.0)) {
-                    println("Starting RouteWalker on riftToEye1")
-                    val path = routeWalker.loadPathFromJson("riftToEye1")
-                    if (path != null) {
-                        routeWalker.setPath(path)
-                        routeWalker.toggle()
-                        warpedToWizard=false
-                    }
-                    if (path != null && isPlayerNearCoordinates(-43.5, 110.5, 72.5, 2.0)) {
-                        routeWalker.setPath(routeWalker.loadPathFromJson("riftToEye2"))
-                        routeWalker.toggle()
-                    }
-                } else if (location.currentArea == Island.TheRift && isPlayerNearCoordinates(-51.5, 104.0, 73.5, 2.0)) {
-                    if (isPlayerNearCoordinates(-52.0, 104.0, 70.0, 4.5)) {
-                        println("Interacting with eye")
-                        //interact with eye...
-                    }
-                } else if (location.currentArea == Island.TheRift && isPlayerNearCoordinates(48.5, 169.0, 38.5, 2.0)) {
-                    println("Starting RouteWalker on eyeToMine")
-                    val path = routeWalker.loadPathFromJson("eyeToMine")
-                    if (path != null) {
-                        routeWalker.setPath(path)
-                        routeWalker.toggle()
-                    }
-                } else if (location.currentArea == Island.TheRift && isPlayerNearCoordinates(18.5, 122.0, 38.5, 2.0)) {
-                    println("Starting RouteWalker on miningWalkerRoute")
-                    val path = routeWalker.loadPathFromJson("miningWalkerRoute")
-                    if (path != null) {
-                        routeWalker.setPath(path)
-                        routeWalker.toggle()
-                    }
-                }
-            }
-        }
-    }*/
 
     fun checkPlayerCurrentIsland() { //debug
         val currentIsland = location.currentArea
@@ -356,6 +272,10 @@ class HighliteMacro {
                     println("state set to returning")
                 }
             }
+            if (!this.Enabled) {
+                println("bot stopped")
+                stopBot()
+            }
         }
 
         fun stopBot() {
@@ -363,6 +283,7 @@ class HighliteMacro {
             movementHelper.stopMovement()
             movementHelper.setKey("shift", down = false)
             movementHelper.setKey("leftclick", down = false)
+
             rotations.stopRotate()
         }
 

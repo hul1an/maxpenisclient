@@ -1,5 +1,6 @@
 package com.github.hul1an.maxpenisclient.commands
 
+import com.github.hul1an.maxpenisclient.utils.LocationUtils
 import com.github.hul1an.maxpenisclient.utils.RouteWalker
 import com.github.hul1an.maxpenisclient.utils.Rotations
 import net.minecraft.client.Minecraft
@@ -162,6 +163,27 @@ class TestRouteWalkerRoute(private val routeWalker: RouteWalker) : CommandBase()
         }else {
             sender?.addChatMessage(ChatComponentText("Usage: ${getCommandUsage(sender)}"))
         }
+    }
+
+    override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean {
+        return true
+    }
+
+}
+
+class LocationTest: CommandBase() {
+    private val location = LocationUtils
+    override fun getCommandName(): String {
+        return "mylocation"
+    }
+
+    override fun getCommandUsage(sender: ICommandSender?): String {
+        return "/mylocation"
+    }
+
+    override fun processCommand(sender: ICommandSender?, args: Array<out String>?) {
+        var currentArea = location.currentArea
+        println(currentArea)
     }
 
     override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean {

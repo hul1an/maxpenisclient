@@ -46,6 +46,7 @@ class ModCore {
         MinecraftForge.EVENT_BUS.register(LocationUtils)
         ClientCommandHandler.instance.registerCommand(CrashCommand())
         ClientCommandHandler.instance.registerCommand(RotationTest())
+        ClientCommandHandler.instance.registerCommand(LocationTest())
         ClientCommandHandler.instance.registerCommand(TestRouteWalkerRoute(routeWalker))
         ClientCommandHandler.instance.registerCommand(AddWaypointCommand(routeWalker))
         ClientCommandHandler.instance.registerCommand(RemoveWaypointCommand(routeWalker))
