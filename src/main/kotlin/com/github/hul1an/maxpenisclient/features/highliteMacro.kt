@@ -6,6 +6,7 @@ import com.github.hul1an.maxpenisclient.utils.RouteWalker.MacroStates
 import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
+import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.init.Blocks
 import net.minecraft.init.Items
 import net.minecraft.inventory.ContainerChest
@@ -106,8 +107,8 @@ class HighliteMacro {
                 movementHelper.setKey("leftclick", false)
                 rotations.stopRotate()
 
-                if (location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 3.0) && this.state == MacroStates.RETURNING){
-                    interactWithNPCTimer.reset()
+                if (location.currentArea == Island.Hub && isPlayerNearCoordinates(46.5, 122.0, 75.5, 3.0) && this.state == MacroStates.RETURNING){ //handles scanning for and buying rift infusion
+                    this.interactWithNPCTimer.reset()
                     val currentScreen = Minecraft.getMinecraft().currentScreen
                     if (currentScreen is GuiChest) {
                         val currentScreen1 = currentScreen as GuiChest
@@ -132,6 +133,38 @@ class HighliteMacro {
                         }
                     }
                 }
+                if (location.currentArea == Island.TheRift && isPlayerNearCoordinates(-50.5, 104.0, 70.5, 3.0)&& this.state == MacroStates.RETURNING) {
+                    this.interactWithNPCTimer.reset()
+                    val currentScreen = Minecraft.getMinecraft().currentScreen
+                    if (currentScreen is GuiChest) {
+                        val currentScreen1 = currentScreen as GuiChest
+                        val container = currentScreen1.inventorySlots as ContainerChest
+                        for (i in 0 until container.lowerChestInventory.sizeInventory) {
+                            val stack = container.lowerChestInventory.getStackInSlot(i)
+                            if (stack != null && stack.hasTagCompound()) {
+                                val lore = stack.tagCompound?.getCompoundTag("display")?.getTagList("Lore", 8)
+                                if (lore != null) {
+                                    for (j in 0 until lore.tagCount()) {
+                                        val loreLine = lore.getStringTagAt(j)
+                                        if (loreLine.contains("§7Location: §fMountaintop")) {
+                                            if (menuCooldown.hasReached(1000)) {
+                                                println("Menu cooldown reached, attempting to click")
+                                                Minecraft.getMinecraft().playerController.windowClick(
+                                                    container.windowId, i, 0, 0, Minecraft.getMinecraft().thePlayer
+                                                )
+                                                this.menuCooldown.reset()
+                                                this.returnTimer.reset()
+                                                println("Clicked that yordan at slot $i")
+                                                infused = true
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 return
             }
@@ -139,6 +172,9 @@ class HighliteMacro {
 
 
             if (this.Enabled) {
+                if (location.isInSkyblock == false) {
+                    return
+                }
 
                 //handles returning to mountaintop
                 if(this.state == MacroStates.RETURNING){
@@ -149,12 +185,12 @@ class HighliteMacro {
                                 routeWalker.setPath(path)
                                 routeWalker.toggle()
                                 this.returnTimer.reset()
-                                interactWithNPCTimer.reset() //premptively reset cooldown so wizard menu doesnt insta open or some shit idk
+                                this.interactWithNPCTimer.reset() //premptively reset cooldown so wizard menu doesnt insta open or some shit idk
                             }
                         }
                         return
                     }
-                    else if (!isPlayerNearCoordinates(42.5, 122.0, 69.0, 10.0) && location.currentArea != Island.TheRift && location.currentArea != Island.Unknown){
+                    else if (!isPlayerNearCoordinates(42.5, 122.0, 69.0, 10.0) && location.currentArea != Island.TheRift && location.currentArea != Island.Unknown){ // warps 2 wizard
                         if(this.returnTimer.hasReached(3000)) {
                             println("time 2 warp")
                             sendChatMessage("/warp wizard")
@@ -199,6 +235,41 @@ class HighliteMacro {
 
                             }
                         }
+                        if(isPlayerNearCoordinates(-43.5, 110.5, 72.5, 2.0)) {
+                            if (this.returnTimer.hasReached(3000)) {
+                                val path = routeWalker.loadPathFromJson("riftToEye2")
+                                routeWalker.setPath(path)
+                                routeWalker.toggle()
+                                this.returnTimer.reset()
+
+                                this.interactWithNPCTimer.reset() //preemptive reset
+
+                            }
+                        }
+                        if (location.currentArea == Island.TheRift && isPlayerNearCoordinates(-50.5, 104.0, 70.0, 3.0)) {
+                            if (this.interactWithNPCTimer.hasReached(3000)) {
+                                println("talk2uheye")
+                                val currentScreen = Minecraft.getMinecraft().currentScreen
+                                if (currentScreen == null) {
+                                    if (this.interactWithEye(-50.5, 104.0, 70.5)) {
+                                        println("interacted with that yordan")
+                                        this.menuCooldown.reset()
+                                        this.interactWithNPCTimer.reset()
+                                        this.returnTimer.reset()
+                                    }
+                                }
+                            }
+                        }
+                        if(isPlayerNearCoordinates(47.5, 169.0, 38.5, 5.0)) {
+                            if (this.returnTimer.hasReached(2000)) {
+                                val path = routeWalker.loadPathFromJson("eyeToMine")
+                                routeWalker.setPath(path)
+                                routeWalker.toggle()
+                                this.returnTimer.reset()
+
+                            }
+                        }
+
 
                     }
                 }
@@ -237,6 +308,34 @@ class HighliteMacro {
                 break
             }
         }
+        this.interactWithNPCTimer.reset()
+        return found
+    }
+    fun interactWithEye(x: Double, y: Double, z: Double): Boolean {
+        val zombies = Minecraft.getMinecraft().theWorld.loadedEntityList.filterIsInstance<EntityZombie>()
+        var found = false
+        for (zombie in zombies) {
+            val distance = mathUtils.calculateDistance(arrayOf(zombie.posX, zombie.posY, zombie.posZ), arrayOf(x, y, z))["distance"]!!
+            println("Checking zombie at (${zombie.posX}, ${zombie.posY}, ${zombie.posZ}) with distance $distance")
+            if (distance <= 4.5) {
+                found = true
+                rotations.rotateTo(Vec3(zombie.posX, zombie.posY + zombie.eyeHeight - 0.4, zombie.posZ), 5.0f)
+                rotations.onEndRotation {
+                    Minecraft.getMinecraft().theWorld.loadedEntityList.forEach { entity ->
+                        if (entity is EntityZombie) {
+                            val entityDistance = mathUtils.distanceToPlayerCT(entity)["distance"]!!
+                           // println("Entity at (${entity.posX}, ${entity.posY}, ${entity.posZ}) with distance $entityDistance")
+                            if (entityDistance < 4.5) {
+                                Minecraft.getMinecraft().playerController.interactWithEntitySendPacket(Minecraft.getMinecraft().thePlayer, entity)
+                                println("Sent interact packet to entity at (${entity.posX}, ${entity.posY}, ${entity.posZ})")
+                            }
+                        }
+                    }
+                }
+                break
+            }
+        }
+        this.interactWithNPCTimer.reset()
         return found
     }
 
