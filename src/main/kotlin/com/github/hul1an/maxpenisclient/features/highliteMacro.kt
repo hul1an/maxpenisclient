@@ -65,6 +65,8 @@ class HighliteMacro {
     private var menuCooldown = TimeHelper()
     private var interactWithNPCTimer = TimeHelper()
 
+    var miningTestSleep = TimeHelper()
+
 
     var riftCollapse = false
     var infused = false
@@ -279,28 +281,34 @@ class HighliteMacro {
 
                     }
                 }
-                if (this.state == MacroStates.MINING) {
+                if (this.state == MacroStates.MINING && location.currentArea == Island.TheRift) {
                     println("i should probably be mining rn vro...")
-                    this.toggle()
+                    //mining logic goes here vro
+                }
+                if (this.state == MacroStates.WALKING && location.currentArea == Island.TheRift){
+                    val path = routeWalker.loadPathFromJson("miningRoute")
+                    if(path != null) { //sets route walker to the mining path and toggles on
+                        routeWalker.setPath(path)
+                        routeWalker.toggle()
 
-                    //TODO
-                    //if current index has 0 players and >1 glass pane within 4.5 blocks of player when player has reached index
-                        //macrostate = mining, pause walker
-                    //if current index has >1 player OR 0 glass panes
-                    //macrostate = walking, walk to next index, rerun check
-
-                    //if state = mining
-                        //mine or age any panes depending on finalAge value until none are left
-                        //set state to walking
-                    //if state = walking
-                        //walk to next index, once reached && checks are run set state to mining
-
+                        val closestCoordinates = routeWalker.getClosestCoordinates()
+                        if (closestCoordinates != null && closestCoordinates.size == 3) {
+                            val (x, y, z) = closestCoordinates
+                            if (isPlayerNearCoordinates(x, y, z, 2.0)) {
+                                //run check for players or glass panes, decide to stop and set state to MINING, or keep walking
+                            }
+                        }
+                    }
+                }
+                if (this.state == MacroStates.CRAFTING) {
                     //if there is >=32 youngite in inventory, set finalage to timeite
                     //if there is >=32 timeite in inv set finalage to obsolite\
                     //once there is >=32 youngite && >=32 timeite && >= 16 obsolite
-                        //set state to crafting
-                        //craft highlite
-                        //set state to walking
+                    //set state to crafting
+                    //craft highlite
+                    //set state to walking
+
+                    //might want to run inventory scan globally idk this is for later
                 }
             }
 

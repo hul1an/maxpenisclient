@@ -21,8 +21,8 @@ class RayTraceUtils {
         doubleArrayOf(0.5, 0.96, 0.5)
     )
 
-    fun setSides(sides: Array<DoubleArray>) {
-        this.sides = sides
+    fun updateSides(newSides: Array<DoubleArray>) {
+        this.sides = newSides
     }
 
     fun returnPointsFromSides(sides: Array<DoubleArray>, blockPos: BlockPos): List<DoubleArray> {

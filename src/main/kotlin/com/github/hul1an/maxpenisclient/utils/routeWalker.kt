@@ -180,6 +180,20 @@ class RouteWalker {
         return closestIndex
     }
 
+    fun getClosestCoordinates(): Array<Double>? { //returns x y z coords
+        var closest: Array<Double>? = null
+        var closestDistance = Double.MAX_VALUE
+
+        this.path.forEach { point ->
+            val distance = MathUtils.distanceToPlayer(point)["distance"] ?: Double.MAX_VALUE
+            if (closest == null || distance < closestDistance) {
+                closest = point
+                closestDistance = distance
+            }
+        }
+        return closest
+    }
+
     fun setRotate(rotate: Boolean) {
         this.rotate = rotate
     }
