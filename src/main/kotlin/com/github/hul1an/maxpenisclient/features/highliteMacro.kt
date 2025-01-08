@@ -28,9 +28,9 @@ class HighliteMacro {
         WAITING,
         MINING,
         RETURNING,
-        WARPING
+        CRAFTING
     }
-    enum class MacroActions {
+    enum class MacroActions { //unused currently
         WALKING,
         WAITING,
         MINING,
@@ -173,6 +173,7 @@ class HighliteMacro {
 
             if (this.Enabled) {
                 if (location.isInSkyblock == false) {
+                    println("not in skyblock nigger")
                     return
                 }
 
@@ -266,12 +267,40 @@ class HighliteMacro {
                                 routeWalker.setPath(path)
                                 routeWalker.toggle()
                                 this.returnTimer.reset()
-
+                                routeWalker.triggerOnEnd {
+                                    println("path ended, executing callback")
+                                    this.state = MacroStates.MINING
+                                    println("state set to ${this.state}")
+                                }
                             }
                         }
 
 
+
                     }
+                }
+                if (this.state == MacroStates.MINING) {
+                    println("i should probably be mining rn vro...")
+                    this.toggle()
+
+                    //TODO
+                    //if current index has 0 players and >1 glass pane within 4.5 blocks of player when player has reached index
+                        //macrostate = mining, pause walker
+                    //if current index has >1 player OR 0 glass panes
+                    //macrostate = walking, walk to next index, rerun check
+
+                    //if state = mining
+                        //mine or age any panes depending on finalAge value until none are left
+                        //set state to walking
+                    //if state = walking
+                        //walk to next index, once reached && checks are run set state to mining
+
+                    //if there is >=32 youngite in inventory, set finalage to timeite
+                    //if there is >=32 timeite in inv set finalage to obsolite\
+                    //once there is >=32 youngite && >=32 timeite && >= 16 obsolite
+                        //set state to crafting
+                        //craft highlite
+                        //set state to walking
                 }
             }
 
@@ -382,6 +411,7 @@ class HighliteMacro {
             movementHelper.stopMovement()
             movementHelper.setKey("shift", down = false)
             movementHelper.setKey("leftclick", down = false)
+            routeWalker.triggerEnd()
 
             rotations.stopRotate()
         }

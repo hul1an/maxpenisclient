@@ -36,8 +36,6 @@ class ModCore {
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
 
-
-
         MinecraftForge.EVENT_BUS.register(MyEventHandlerClass())
         MinecraftForge.EVENT_BUS.register(this)
         MinecraftForge.EVENT_BUS.register(KeyBindHandler(config.minerKeyBind, highliteMacro))
