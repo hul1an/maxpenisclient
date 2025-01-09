@@ -78,7 +78,7 @@ class BlockScanClass {
                         val blockState = world.getBlockState(pos) ?: continue
                         val block = blockState.block
                         val metadata = block.getMetaFromState(blockState)
-                        if (metadata == 3 && block.registryName == "minecraft:stained_glass_pane") {
+                        if (block.registryName == "minecraft:stained_glass_pane") {
                             blockList.add(pos)
                         }
                     } catch (e: YouFuckedUpException) {

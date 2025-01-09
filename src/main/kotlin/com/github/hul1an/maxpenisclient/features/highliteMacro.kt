@@ -292,7 +292,6 @@ class HighliteMacro {
 
 
                     //checking if we can craft 2 highlite then setting state to crafting
-                   /*
                     val youngiteCount = scanInventory(Youngite)
                     val timeiteCount = scanInventory(Timeite)
                     val obsoliteCount = scanInventory(Obsolite)
@@ -311,15 +310,27 @@ class HighliteMacro {
                         youngiteCount >= 64 -> {
                             this.finalAge = 11
                         }
-                    }*/
+                    }
 
                     //mining logic here
                     if (blockScan.fullSortScan().size >= 1) {
+                        val world = Minecraft.getMinecraft().theWorld
                         var currentBlock = blockScan.fullSortScan()[0]
-                        if (mineBlock(currentBlock)) {
-                            if (blockScan.fullSortScan().size == 0) {
-                                this.state = MacroStates.WALKING
+                        var currentBlockPos = BlockPos(currentBlock)
+                        var currentBlockState = world.getBlockState(currentBlockPos)
+                        var currentBlockBlock = currentBlockState.block
+                        var currentBlockMeta = currentBlockBlock.getMetaFromState(currentBlockState)
+
+                        if (currentBlockMeta == this.finalAge) {
+                            if (mineBlock(currentBlock)) {
+                                if (blockScan.fullSortScan().size == 0) {
+                                    movementHelper.setKey("leftclick", down = false)
+                                    this.state = MacroStates.WALKING
+                                }
                             }
+                        }
+                        else if(currentBlockMeta != this.finalAge) {
+                            //age
                         }
                     }
                 }
@@ -525,16 +536,20 @@ class HighliteMacro {
         if (point != null) {
             val blockState = world.getBlockState(block).block
 
-            if (blockState == world.getBlockState(block).block) {
-                curMining = true
-                rotations.rotateTo(Vec3(point[0], point[1], point[2]))
-                println("rotating rn")
-                rotations.onEndRotation {
+
+
+            rotations.rotateTo(Vec3(point[0], point[1], point[2]))
+            println("rotating rn")
+            rotations.onEndRotation {
+                if(!movementHelper.isKeyDown("leftclick")) {
                     movementHelper.setKey("leftclick", down = true)
                     println("left click to true")
                 }
 
+
             }
+
+
         }
         return false
     }
