@@ -284,6 +284,8 @@ class HighliteMacro {
                 if (this.state == MacroStates.MINING && location.currentArea == Island.TheRift) {
                     println("i should probably be mining rn vro...")
                     //mining logic goes here vro
+
+
                 }
                 if (this.state == MacroStates.WALKING && location.currentArea == Island.TheRift){
                     val path = routeWalker.loadPathFromJson("miningRoute")
@@ -301,6 +303,8 @@ class HighliteMacro {
                     }
                 }
                 if (this.state == MacroStates.CRAFTING) {
+
+
                     //if there is >=32 youngite in inventory, set finalage to timeite
                     //if there is >=32 timeite in inv set finalage to obsolite\
                     //once there is >=32 youngite && >=32 timeite && >= 16 obsolite
