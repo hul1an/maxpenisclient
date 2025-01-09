@@ -13,16 +13,20 @@ import cc.polyfrost.oneconfig.libs.universal.UKeyboard
 
 
 class MyConfig : Config(Mod("maxpenisaddons", ModType.SKYBLOCK), "maxpenisConfig.json") {
+
     @KeyBind(name = "Highlite Miner Keybind", category = "Rift", subcategory = "mountaintop")
     lateinit var minerKeyBind: OneKeyBind // had to move ts to the top because oneconfig in kotlin is strange
+
 
     init {
         initialize()
         minerKeyBind = OneKeyBind(UKeyboard.KEY_B)
+
         addDependency("subSwitch") { masterSwitch }
         addDependency("finalAge") { highliteMinerMainToggle }
         addDependency("rotationSmoothness") { highliteMinerMainToggle } // doesnt work
         addDependency("minerKeyBind") { highliteMinerMainToggle }
+
     }
     //test
     @Switch(name = "Master Switch", size = OptionSize.DUAL, category = "General", subcategory = "Switches")

@@ -121,23 +121,18 @@ class MathUtilsClass {
     }
 
     fun getDistanceToPlayerEyes(xInput: Any, yInput: Any, zInput: Any): Map<String, Double> {
-        var x = xInput
-        var y = yInput
-        var z = zInput
-        if (xInput !is Number) {
-            val vector = convertToVector(xInput)
-            x = vector.x
-            y = vector.y
-            z = vector.z
-        }
+        val x = (xInput as? Number)?.toDouble() ?: convertToVector(xInput).x
+        val y = (yInput as? Number)?.toDouble() ?: convertToVector(yInput).y
+        val z = (zInput as? Number)?.toDouble() ?: convertToVector(zInput).z
+
         val eyeVector = convertToVector(Minecraft.getMinecraft().thePlayer.getPositionEyes(1.0f))
         return getDistance(
             eyeVector.x,
             eyeVector.y,
             eyeVector.z,
-            x as Double,
-            y as Double,
-            z as Double
+            x,
+            y,
+            z
         )
     }
 

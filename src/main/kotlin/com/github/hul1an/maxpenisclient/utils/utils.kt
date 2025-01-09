@@ -6,6 +6,7 @@ import net.minecraft.network.Packet
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3i
+import net.minecraft.util.Vec3
 import java.util.*
 
 class UtilsClass {
@@ -13,6 +14,8 @@ class UtilsClass {
     fun sendPacket(packet: Packet<*>) {
         Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(packet)
     }
+
+
 
     fun isLookingAtPos(pos: BlockPos): Boolean {
         val block = Minecraft.getMinecraft().thePlayer.rayTrace(4.5, 1.0F)?.blockPos

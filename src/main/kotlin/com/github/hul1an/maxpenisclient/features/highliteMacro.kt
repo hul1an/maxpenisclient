@@ -11,6 +11,7 @@ import net.minecraft.init.Blocks
 import net.minecraft.init.Items
 import net.minecraft.inventory.ContainerChest
 import net.minecraft.item.Item
+import net.minecraft.item.ItemStack
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraft.util.Vec3i
@@ -45,6 +46,7 @@ class HighliteMacro {
     val location = LocationUtils
     val routeWalker = RouteWalker()
     val mathUtils = MathUtilsClass()
+    val blockScan = BlockScanClass()
 
     private var finalAge: Int = 3
     private var Enabled: Boolean
@@ -58,8 +60,12 @@ class HighliteMacro {
         doubleArrayOf(0.5, 0.5, 0.01),
         doubleArrayOf(0.5, 0.5, 0.99)
     )
+    private var Youngite: String = "All sparkle and no substance"
+    private var Timeite: String = "Older, wiser, but refusing to admit"
+    private var Obsolite: String = "Practically a fossil"
     private var state: MacroStates
     private var action: MacroActions
+    private var curMining: Boolean = false
 
     private var returnTimer = TimeHelper()
     private var menuCooldown = TimeHelper()
@@ -172,12 +178,12 @@ class HighliteMacro {
             }
 
 
-
+            // MAIN MINING STUFF HERE
             if (this.Enabled) {
-                if (location.isInSkyblock == false) {
-                    println("not in skyblock nigger")
-                    return
-                }
+              //  if (location.isInSkyblock == false) {
+                 //   println("not in skyblock nigger")
+                 //   return
+              //  }
 
                 //handles returning to mountaintop
                 if(this.state == MacroStates.RETURNING){
@@ -281,13 +287,46 @@ class HighliteMacro {
 
                     }
                 }
-                if (this.state == MacroStates.MINING && location.currentArea == Island.TheRift) {
-                    println("i should probably be mining rn vro...")
-                    //mining logic goes here vro
+                if (this.state == MacroStates.MINING /*&& location.currentArea == Island.TheRift*/) {
 
 
+
+                    //checking if we can craft 2 highlite then setting state to crafting
+                   /*
+                    val youngiteCount = scanInventory(Youngite)
+                    val timeiteCount = scanInventory(Timeite)
+                    val obsoliteCount = scanInventory(Obsolite)
+                    when {
+                        youngiteCount >= 64 && timeiteCount >= 64 && obsoliteCount >= 32 -> {
+                            this.menuCooldown.reset()
+                            this.state = MacroStates.CRAFTING
+                            this.finalAge = 3 // set back to youngite
+                        }
+                        obsoliteCount >= 32 && timeiteCount >= 64 -> {
+                            this.finalAge = if (youngiteCount < 64) 3 else this.finalAge
+                        }
+                        timeiteCount >= 64 -> {
+                            this.finalAge = 10
+                        }
+                        youngiteCount >= 64 -> {
+                            this.finalAge = 11
+                        }
+                    }*/
+
+                    //mining logic here
+                    if (blockScan.fullSortScan().size >= 1) {
+                        var currentBlock = blockScan.fullSortScan()[0]
+                        if (mineBlock(currentBlock)) {
+                            if (blockScan.fullSortScan().size == 0) {
+                                this.state = MacroStates.WALKING
+                            }
+                        }
+                    }
                 }
+
+
                 if (this.state == MacroStates.WALKING && location.currentArea == Island.TheRift){
+
                     val path = routeWalker.loadPathFromJson("miningRoute")
                     if(path != null) { //sets route walker to the mining path and toggles on
                         routeWalker.setPath(path)
@@ -297,22 +336,34 @@ class HighliteMacro {
                         if (closestCoordinates != null && closestCoordinates.size == 3) {
                             val (x, y, z) = closestCoordinates
                             if (isPlayerNearCoordinates(x, y, z, 2.0)) {
-                                //run check for players or glass panes, decide to stop and set state to MINING, or keep walking
+                                if(blockScan.fullSortScan().size >= 1) {
+                                    println("found blocks to mine")
+                                    this.state = MacroStates.MINING
+                                }
                             }
                         }
                     }
                 }
                 if (this.state == MacroStates.CRAFTING) {
+                    if(this.menuCooldown.hasReached(500) && Minecraft.getMinecraft().currentScreen == null) {
+                        sendChatMessage("/craft")
+                        println("opening craft vro")
+                        this.menuCooldown.reset()
+                    }
+                    if(Minecraft.getMinecraft().currentScreen != null) {
+                        return
+                    }
 
 
-                    //if there is >=32 youngite in inventory, set finalage to timeite
-                    //if there is >=32 timeite in inv set finalage to obsolite\
-                    //once there is >=32 youngite && >=32 timeite && >= 16 obsolite
-                    //set state to crafting
+
+
+                    //crafting logic goes here vro
+
+
                     //craft highlite
                     //set state to walking
 
-                    //might want to run inventory scan globally idk this is for later
+                    this.state = MacroStates.WALKING
                 }
             }
 
@@ -329,6 +380,28 @@ class HighliteMacro {
     fun checkPlayerCurrentIsland() { //debug
         val currentIsland = location.currentArea
         println("The player is currently on: $currentIsland")
+    }
+
+    fun scanInventory(itemLore: String): Int {
+        val player = Minecraft.getMinecraft().thePlayer
+        val inventory = player.inventory.mainInventory
+        var count = 0
+
+        for (itemStack in inventory) {
+            if (itemStack != null && itemStack.hasTagCompound()) {
+                val lore = itemStack.tagCompound?.getCompoundTag("display")?.getTagList("Lore", 8)
+                if (lore != null) {
+                    for (i in 0 until lore.tagCount()) {
+                        val loreLine = lore.getStringTagAt(i)
+                        if (loreLine.contains(itemLore)) {
+                            count += itemStack.stackSize
+                            break
+                        }
+                    }
+                }
+            }
+        }
+        return count
     }
 
 
@@ -388,51 +461,91 @@ class HighliteMacro {
         return distance <= threshold
     }
 
-        @SubscribeEvent
-        fun onCollapse(event: ClientChatReceivedEvent) {
-            if (event.message.unformattedText.contains("Rift is Collapsing!"))
-                riftCollapse = true
-        }
-
-        fun toggle() { //called via keybind in config i think (it works)
-            System.out.println("toggled")
-            this.Enabled = !this.Enabled
-
-            if (this.Enabled) {
-                System.out.println("currently enabled")
-                //this.startTime = Date.now()
-                this.state = MacroStates.WAITING;
-
-                returnTimer.reset()
-                menuCooldown.reset()
-                interactWithNPCTimer.reset()
-
-                if(location.currentArea != Island.TheRift) {
-                    this.state = MacroStates.RETURNING
-                    println("state set to returning")
-                }
-            }
-            if (!this.Enabled) {
-                println("bot stopped")
-                stopBot()
-            }
-        }
-
-        fun stopBot() {
-            this.Enabled = false
-            movementHelper.stopMovement()
-            movementHelper.setKey("shift", down = false)
-            movementHelper.setKey("leftclick", down = false)
-            routeWalker.triggerEnd()
-
-            rotations.stopRotate()
-        }
-
-        fun sendChatMessage(message: String) {
-            Minecraft.getMinecraft().thePlayer.sendChatMessage(message)
+    @SubscribeEvent
+    fun onCollapse(event: ClientChatReceivedEvent) {
+        if (event.message.unformattedText.contains("Rift is Collapsing!")) {
+            riftCollapse = true
         }
     }
 
+    fun toggle() { //called via keybind in config i think (it works)
+        System.out.println("toggled")
+        this.Enabled = !this.Enabled
+
+        if (this.Enabled) {
+            System.out.println("currently enabled")
+            //this.startTime = Date.now()
+            this.state = MacroStates.WAITING;
+
+            returnTimer.reset()
+            menuCooldown.reset()
+            interactWithNPCTimer.reset()
+
+            if(location.currentArea != Island.TheRift) {
+                this.state = MacroStates.RETURNING
+                println("state set to returning")
+            }
+        }
+        if (!this.Enabled) {
+            println("bot stopped")
+            stopBot()
+        }
+    }
+
+    fun toggle2() {
+        System.out.println("toggled2")
+        this.Enabled = !this.Enabled
+
+        if (this.Enabled) {
+            println("toggle2 enabled")
+            this.state = MacroStates.MINING
+        }
+        if (!this.Enabled) {
+            println("bot stopped")
+            stopBot()
+        }
+    }
+
+    fun stopBot() {
+        this.Enabled = false
+        movementHelper.stopMovement()
+        movementHelper.setKey("shift", down = false)
+        movementHelper.setKey("leftclick", down = false)
+        routeWalker.triggerEnd()
+        rotations.stopRotate()
+    }
+    fun sendChatMessage(message: String) { Minecraft.getMinecraft().thePlayer.sendChatMessage(message) }
+
+
+    fun mineBlock(block: BlockPos): Boolean {
+        val world = Minecraft.getMinecraft().theWorld
+        val playerEyes = Minecraft.getMinecraft().thePlayer.getPositionEyes(1.0f)
+        val point = rayTraceUtils.getPointOnBlock(block, playerEyes, mcCast = true)
+
+        if (point != null) {
+            val blockState = world.getBlockState(block).block
+
+            if (blockState == world.getBlockState(block).block) {
+                curMining = true
+                rotations.rotateTo(Vec3(point[0], point[1], point[2]))
+                println("rotating rn")
+                rotations.onEndRotation {
+                    movementHelper.setKey("leftclick", down = true)
+                    println("left click to true")
+                }
+
+            }
+        }
+        return false
+    }
+}
+    //snap to block
+    //start mining
+    //wait till block becomes air
+    //stop mining
+    //:)
+
+    /*
     class MiningBlock(val blockid: Int, val metadata: Int) {
 
         fun equals(block: Block): Boolean {
@@ -450,4 +563,6 @@ class HighliteMacro {
         val blockid: Int = Block.getIdFromBlock(block)
     }
 
-class MineVein(val positions: Array<BlockPos>)
+     */
+
+//class MineVein(val positions: Array<BlockPos>)
