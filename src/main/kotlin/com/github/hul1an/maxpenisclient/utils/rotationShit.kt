@@ -91,6 +91,7 @@ class Rotations {
     }
 
     fun interpolate(targetRotation: NewRotation, speed: Int = SPEED): NewRotation {
+        this.SPEED = config.rotationSmoothness.toInt()
         val lastRotation = NewRotation(Minecraft.getMinecraft().thePlayer.rotationYaw, Minecraft.getMinecraft().thePlayer.rotationPitch)
 
         // Get diffs and distance to vec

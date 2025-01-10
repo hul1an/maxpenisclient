@@ -107,7 +107,7 @@ class KeyBindHandler(private val minerKeyBind: OneKeyBind, private val highliteM
         if (Keyboard.getEventKeyState() && minerKeyBind.isActive) {
             // Handle the key press event
             println("Miner key bind pressed")
-            highliteMacro.toggle2()
+            highliteMacro.toggle()
         }
 
 

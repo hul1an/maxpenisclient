@@ -23,9 +23,10 @@ class MyConfig : Config(Mod("maxpenisaddons", ModType.SKYBLOCK), "maxpenisConfig
         minerKeyBind = OneKeyBind(UKeyboard.KEY_B)
 
         addDependency("subSwitch") { masterSwitch }
-        addDependency("finalAge") { highliteMinerMainToggle }
         addDependency("rotationSmoothness") { highliteMinerMainToggle } // doesnt work
         addDependency("minerKeyBind") { highliteMinerMainToggle }
+
+        addListener("rotationSmoothness") { save() }
 
     }
     //test
@@ -37,8 +38,6 @@ class MyConfig : Config(Mod("maxpenisaddons", ModType.SKYBLOCK), "maxpenisConfig
     //rift
     @Switch(name = "Highlite Miner", size = OptionSize.DUAL, category = "Rift", subcategory = "mountaintop")
     var highliteMinerMainToggle: Boolean = false
-    @Dropdown(name = "Final Age", size = OptionSize.DUAL, options = ["Youngite", "Timeite", "Obsolite"], category = "Rift", subcategory = "mountaintop")
-    var finalAge = 0
-    @Slider(name = "Rotation Smoothness", min = 10f, max = 50f, step = 5, category = "Rift", subcategory = "mountaintop")
-    var rotationSmoothness = 20f
+    @Slider(name = "Rotation Smoothness", min = 5f, max = 25f, step = 5, category = "Rift", subcategory = "mountaintop")
+    var rotationSmoothness = 15f
 }

@@ -1,6 +1,7 @@
 package com.github.hul1an.maxpenisclient.features
 
 import com.github.hul1an.maxpenisclient.MyConfig
+import com.github.hul1an.maxpenisclient.clock.utils
 import com.github.hul1an.maxpenisclient.utils.*
 import com.github.hul1an.maxpenisclient.utils.RouteWalker.MacroStates
 import net.minecraft.block.Block
@@ -65,7 +66,7 @@ class HighliteMacro {
     private var Obsolite: String = "Practically a fossil"
     private var state: MacroStates
     private var action: MacroActions
-    private var curMining: Boolean = false
+    private var walkingRoute: Boolean = false
 
     private var returnTimer = TimeHelper()
     private var menuCooldown = TimeHelper()
@@ -84,11 +85,7 @@ class HighliteMacro {
         this.Enabled = false
         this.whitelist = emptyArray()
         //toggle works on keybind and is called from ModCore.kt :)
-        when (config.finalAge) {
-            0 -> this.finalAge = 3 //youngite
-            1 -> this.finalAge = 11 //timeite
-            2 -> this.finalAge = 10 //obsolite
-        }
+
 
         this.state = MacroStates.WAITING
         this.action = MacroActions.WAITING
@@ -103,6 +100,11 @@ class HighliteMacro {
 
     @SubscribeEvent
     fun onClientTick(event: TickEvent.ClientTickEvent) {
+       // when (config.finalAge) {
+          //  0 -> this.finalAge = 3 //youngite
+          //  1 -> this.finalAge = 11 //timeite
+          //  2 -> this.finalAge = 10 //obsolite
+      //  }
         if (event.phase == TickEvent.Phase.START) {
             if (!this.Enabled) {
                 return
@@ -173,6 +175,40 @@ class HighliteMacro {
                         }
                     }
                 }
+                //handles crafting higlite using quickcraft
+                if (location.currentArea == Island.TheRift && this.state == MacroStates.CRAFTING) {
+                    val currentScreen = Minecraft.getMinecraft().currentScreen
+                    if (currentScreen is GuiChest) {
+                        val currentScreen1 = currentScreen as GuiChest
+                        val container = currentScreen1.inventorySlots as ContainerChest
+                        for (i in 0 until container.lowerChestInventory.sizeInventory) {
+                            val stack = container.lowerChestInventory.getStackInSlot(i)
+                            if (stack != null && stack.hasTagCompound()) {
+                                val lore = stack.tagCompound?.getCompoundTag("display")?.getTagList("Lore", 8)
+                                if (lore != null) {
+                                    for (j in 0 until lore.tagCount()) {
+                                        val loreLine = lore.getStringTagAt(j)
+                                        //println(loreLine) debug
+                                        if (loreLine.contains("This is what")) {
+                                            if (menuCooldown.hasReached(1000)) {
+                                                println("Menu cooldown reached, attempting to click")
+                                                Minecraft.getMinecraft().playerController.windowClick(
+                                                    container.windowId, i, 0, 1, Minecraft.getMinecraft().thePlayer
+                                                )
+                                                this.menuCooldown.reset()
+                                                this.returnTimer.reset()
+                                                println("Clicked that yordan at slot $i")
+                                                Minecraft.getMinecraft().displayGuiScreen(null)
+                                                this.state = MacroStates.WALKING
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 return
             }
@@ -180,10 +216,10 @@ class HighliteMacro {
 
             // MAIN MINING STUFF HERE
             if (this.Enabled) {
-              //  if (location.isInSkyblock == false) {
-                 //   println("not in skyblock nigger")
-                 //   return
-              //  }
+                if (!location.isInSkyblock) {
+                    println("not in skyblock nigger")
+                   return
+               }
 
                 //handles returning to mountaintop
                 if(this.state == MacroStates.RETURNING){
@@ -256,7 +292,7 @@ class HighliteMacro {
                             }
                         }
                         if (location.currentArea == Island.TheRift && isPlayerNearCoordinates(-50.5, 104.0, 70.0, 3.0)) {
-                            if (this.interactWithNPCTimer.hasReached(3000)) {
+                            if (this.interactWithNPCTimer.hasReached(2000)) {
                                 println("talk2uheye")
                                 val currentScreen = Minecraft.getMinecraft().currentScreen
                                 if (currentScreen == null) {
@@ -287,8 +323,8 @@ class HighliteMacro {
 
                     }
                 }
-                if (this.state == MacroStates.MINING /*&& location.currentArea == Island.TheRift*/) {
-
+                if (this.state == MacroStates.MINING && location.currentArea == Island.TheRift) {
+                    println(this.state)
 
 
                     //checking if we can craft 2 highlite then setting state to crafting
@@ -296,24 +332,24 @@ class HighliteMacro {
                     val timeiteCount = scanInventory(Timeite)
                     val obsoliteCount = scanInventory(Obsolite)
                     when {
-                        youngiteCount >= 64 && timeiteCount >= 64 && obsoliteCount >= 32 -> {
+                        youngiteCount >= 32 && timeiteCount >= 32 && obsoliteCount >= 16 -> {
                             this.menuCooldown.reset()
                             this.state = MacroStates.CRAFTING
                             this.finalAge = 3 // set back to youngite
                         }
-                        obsoliteCount >= 32 && timeiteCount >= 64 -> {
-                            this.finalAge = if (youngiteCount < 64) 3 else this.finalAge
+                        obsoliteCount >= 16 && timeiteCount >= 32 -> {
+                            this.finalAge = if (youngiteCount < 32) 3 else this.finalAge
                         }
-                        timeiteCount >= 64 -> {
+                        timeiteCount >= 32 -> {
                             this.finalAge = 10
                         }
-                        youngiteCount >= 64 -> {
+                        youngiteCount >= 32 -> {
                             this.finalAge = 11
                         }
                     }
 
                     //mining logic here
-                    if (blockScan.fullSortScan().size >= 1) {
+                    if (blockScan.fullSortScan().size >= 1 ) {
                         val world = Minecraft.getMinecraft().theWorld
                         var currentBlock = blockScan.fullSortScan()[0]
                         var currentBlockPos = BlockPos(currentBlock)
@@ -323,58 +359,87 @@ class HighliteMacro {
 
                         if (currentBlockMeta == this.finalAge) {
                             if (mineBlock(currentBlock)) {
+
+                            }
+                        }
+                        else if(currentBlockMeta != this.finalAge && this.state == MacroStates.MINING) {
+                            movementHelper.setKey("leftclick", down = false)
+                            if (ageBlock(currentBlock)) {
                                 if (blockScan.fullSortScan().size == 0) {
-                                    movementHelper.setKey("leftclick", down = false)
+                                    movementHelper.setKey("rightclick", down = false)
                                     this.state = MacroStates.WALKING
                                 }
                             }
+
+
                         }
-                        else if(currentBlockMeta != this.finalAge) {
-                            //age
-                        }
+                    }
+                    if (blockScan.fullSortScan().size == 0 && this.state == MacroStates.MINING) {
+                        movementHelper.setKey("leftclick", down = false)
+                        movementHelper.setKey("rightclick", down = false)
+                        this.state = MacroStates.WALKING
                     }
                 }
 
 
                 if (this.state == MacroStates.WALKING && location.currentArea == Island.TheRift){
 
+
                     val path = routeWalker.loadPathFromJson("miningRoute")
-                    if(path != null) { //sets route walker to the mining path and toggles on
+                    if(path != null && !this.walkingRoute) { //sets route walker to the mining path and toggles on
+                        this.walkingRoute = true
                         routeWalker.setPath(path)
                         routeWalker.toggle()
-
-                        val closestCoordinates = routeWalker.getClosestCoordinates()
-                        if (closestCoordinates != null && closestCoordinates.size == 3) {
-                            val (x, y, z) = closestCoordinates
-                            if (isPlayerNearCoordinates(x, y, z, 2.0)) {
-                                if(blockScan.fullSortScan().size >= 1) {
-                                    println("found blocks to mine")
-                                    this.state = MacroStates.MINING
-                                }
+                        println("toggled walker")
+                    }
+                    val closestCoordinates = routeWalker.getClosestCoordinates()
+                    if (closestCoordinates != null && closestCoordinates.size == 3) {
+                        val (x, y, z) = closestCoordinates
+                        if (isPlayerNearCoordinates(x, y, z, 2.0) && !scanForPlayersAroundCoords(x, y, z)) {
+                            if(blockScan.fullSortScan().size >= 1) {
+                                println("found blocks to mine")
+                                routeWalker.toggle()
+                                this.state = MacroStates.MINING
+                                this.walkingRoute = false
                             }
                         }
                     }
+
+                    if(path.contentEquals(routeWalker.loadPathFromJson("miningRoute"))){
+                        routeWalker.triggerOnEnd {
+                            val path = routeWalker.loadPathFromJson("miningRouteReturn")
+                            routeWalker.setPath(path)
+                        }
+                    }
+                    if(path.contentEquals(routeWalker.loadPathFromJson("miningRouteReturn"))){
+                        routeWalker.triggerOnEnd {
+                            val path = routeWalker.loadPathFromJson("miningRoute")
+                            routeWalker.setPath(path)
+                        }
+                    }
+
                 }
+
                 if (this.state == MacroStates.CRAFTING) {
+                    println(this.state)
                     if(this.menuCooldown.hasReached(500) && Minecraft.getMinecraft().currentScreen == null) {
                         sendChatMessage("/craft")
                         println("opening craft vro")
                         this.menuCooldown.reset()
                     }
-                    if(Minecraft.getMinecraft().currentScreen != null) {
-                        return
+                    val youngiteCount = scanInventory(Youngite)
+                    val timeiteCount = scanInventory(Timeite)
+                    val obsoliteCount = scanInventory(Obsolite)
+
+                    if (youngiteCount < 32 || timeiteCount < 32 || obsoliteCount < 16) {
+                        this.state = MacroStates.MINING
+                        println("state set to $state")
                     }
 
+                    println("i should be crafting rn vro")
 
 
 
-                    //crafting logic goes here vro
-
-
-                    //craft highlite
-                    //set state to walking
-
-                    this.state = MacroStates.WALKING
                 }
             }
 
@@ -414,7 +479,30 @@ class HighliteMacro {
         }
         return count
     }
+    fun quickCraftFinder(itemLore: String): Int? {
+        val player = Minecraft.getMinecraft().thePlayer
+        val currentScreen = Minecraft.getMinecraft().currentScreen
 
+        if (currentScreen is GuiChest) {
+            val container = currentScreen.inventorySlots as ContainerChest
+
+            for (i in 0 until container.lowerChestInventory.sizeInventory) {
+                val itemStack = container.lowerChestInventory.getStackInSlot(i)
+                if (itemStack != null && itemStack.hasTagCompound()) {
+                    val lore = itemStack.tagCompound?.getCompoundTag("display")?.getTagList("Lore", 8)
+                    if (lore != null) {
+                        for (j in 0 until lore.tagCount()) {
+                            val loreLine = lore.getStringTagAt(j)
+                            if (loreLine.contains(itemLore)) {
+                                return i
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null
+    }
 
     fun interactWithNpc(x: Double, y: Double, z: Double): Boolean { //returns boolean use in if statement
         val players = Minecraft.getMinecraft().theWorld.playerEntities
@@ -436,6 +524,24 @@ class HighliteMacro {
         this.interactWithNPCTimer.reset()
         return found
     }
+    fun scanForPlayersAroundCoords(x: Double, y: Double, z: Double): Boolean {
+        val players = Minecraft.getMinecraft().theWorld.playerEntities
+        val localPlayer = Minecraft.getMinecraft().thePlayer
+        var found = false
+        for (player in players) {
+            if (player != localPlayer && mathUtils.calculateDistance(arrayOf(player.posX, player.posY, player.posZ), arrayOf(x, y, z))["distanceFlat"]!! < 3) {
+                found = true
+                break
+            }
+        }
+        if (found) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+
     fun interactWithEye(x: Double, y: Double, z: Double): Boolean {
         val zombies = Minecraft.getMinecraft().theWorld.loadedEntityList.filterIsInstance<EntityZombie>()
         var found = false
@@ -494,7 +600,11 @@ class HighliteMacro {
 
             if(location.currentArea != Island.TheRift) {
                 this.state = MacroStates.RETURNING
-                println("state set to returning")
+                println("state set to $state")
+            }
+            if(location.currentArea == Island.TheRift) {
+                this.state = MacroStates.WALKING
+                println("state set to $state")
             }
         }
         if (!this.Enabled) {
@@ -503,7 +613,7 @@ class HighliteMacro {
         }
     }
 
-    fun toggle2() {
+    fun toggle2() { //test toggle
         System.out.println("toggled2")
         this.Enabled = !this.Enabled
 
@@ -519,10 +629,14 @@ class HighliteMacro {
 
     fun stopBot() {
         this.Enabled = false
+        this.walkingRoute = false
         movementHelper.stopMovement()
         movementHelper.setKey("shift", down = false)
         movementHelper.setKey("leftclick", down = false)
-        routeWalker.triggerEnd()
+        movementHelper.setKey("rightclick", down = false)
+        val path = routeWalker.loadPathFromJson("sexroute9000") //null/empty path to stop route walker
+        routeWalker.setPath(path)
+        routeWalker.toggle()
         rotations.stopRotate()
     }
     fun sendChatMessage(message: String) { Minecraft.getMinecraft().thePlayer.sendChatMessage(message) }
@@ -535,11 +649,10 @@ class HighliteMacro {
 
         if (point != null) {
             val blockState = world.getBlockState(block).block
+            //find iron pickaxe in hotbar and set held item
 
-
-
+            setHeldItemInHotbar(257)
             rotations.rotateTo(Vec3(point[0], point[1], point[2]))
-            println("rotating rn")
             rotations.onEndRotation {
                 if(!movementHelper.isKeyDown("leftclick")) {
                     movementHelper.setKey("leftclick", down = true)
@@ -553,12 +666,60 @@ class HighliteMacro {
         }
         return false
     }
+
+    fun ageBlock(block: BlockPos): Boolean {
+        val world = Minecraft.getMinecraft().theWorld
+        val playerEyes = Minecraft.getMinecraft().thePlayer.getPositionEyes(1.0f)
+        val point = rayTraceUtils.getPointOnBlock(block, playerEyes, mcCast = true)
+
+        if (point != null) {
+            val blockState = world.getBlockState(block)
+            val blockMeta = blockState.block.getMetaFromState(blockState)
+
+            if (blockMeta != this.finalAge) {
+                //find diamond horse armor in hotbar and set as held item
+                setHeldItemInHotbar(419)
+                rotations.rotateTo(Vec3(point[0], point[1], point[2]))
+                rotations.onEndRotation {
+                    if(!movementHelper.isKeyDown("rightclick")) {
+                        movementHelper.setKey("rightclick", down = true)
+                        println("right click to true")
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    fun setHeldItemInHotbar(itemId: Int) {
+        val player = Minecraft.getMinecraft().thePlayer
+        val inventory = player.inventory.mainInventory
+
+        // Check if the player is already holding the item
+        val currentItem = player.inventory.getCurrentItem()
+        if (currentItem != null && Item.getIdFromItem(currentItem.item) == itemId) {
+            return
+        }
+
+        // Check if an item with the matching item ID is in inventory
+        for (i in inventory.indices) {
+            val itemStack = inventory[i]
+            if (itemStack != null && Item.getIdFromItem(itemStack.item) == itemId) {
+                // Check if the item is in hotbar slots 1-8
+                if (i in 0..8) {
+                    // If it is in hotbar, set held item
+                    player.inventory.currentItem = i
+                    println("set held item to $i")
+                    return
+                }
+            }
+        }
+    }
+
+
 }
-    //snap to block
-    //start mining
-    //wait till block becomes air
-    //stop mining
-    //:)
+
+
 
     /*
     class MiningBlock(val blockid: Int, val metadata: Int) {

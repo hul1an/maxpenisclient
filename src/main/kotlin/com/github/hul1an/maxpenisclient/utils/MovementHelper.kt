@@ -23,6 +23,7 @@ class MovementHelper {
             "space" -> KeyBinding.setKeyBindState(mc.gameSettings.keyBindJump.keyCode, down)
             "shift" -> KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, down)
             "leftclick" -> KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.keyCode, down) // use for mining blocks :)) no more packets
+            "rightclick" -> KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.keyCode, down)
             "sprint" -> KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.keyCode, down)
         }
     }
@@ -36,6 +37,7 @@ class MovementHelper {
             "space" -> mc.gameSettings.keyBindJump.isKeyDown
             "shift" -> mc.gameSettings.keyBindSneak.isKeyDown
             "leftclick" -> mc.gameSettings.keyBindAttack.isKeyDown
+            "rightclick" -> mc.gameSettings.keyBindUseItem.isKeyDown
             "sprint" -> mc.gameSettings.keyBindSprint.isKeyDown
             else -> false
         }
