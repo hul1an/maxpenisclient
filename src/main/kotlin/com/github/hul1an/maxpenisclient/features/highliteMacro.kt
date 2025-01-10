@@ -23,6 +23,10 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.util.Timer
 import java.util.TimerTask
 
+
+//Hul1an is solely responsible for this monster of a function, and only he has the lack of sanity to debug it and work on it
+
+
 class HighliteMacro {
 
     enum class MacroStates {
@@ -32,6 +36,7 @@ class HighliteMacro {
         RETURNING,
         CRAFTING
     }
+
     enum class MacroActions { //unused currently
         WALKING,
         WAITING,
@@ -71,6 +76,9 @@ class HighliteMacro {
     private var returnTimer = TimeHelper()
     private var menuCooldown = TimeHelper()
     private var interactWithNPCTimer = TimeHelper()
+    private var miningRoute1 = routeWalker.loadPathFromJson("miningRoute")
+    private val miningRoute2 = routeWalker.loadPathFromJson("miningRouteReturn")
+    private var flipflop = 0
 
     var miningTestSleep = TimeHelper()
 
@@ -385,40 +393,43 @@ class HighliteMacro {
                 if (this.state == MacroStates.WALKING && location.currentArea == Island.TheRift){
 
 
-                    val path = routeWalker.loadPathFromJson("miningRoute")
-                    if(path != null && !this.walkingRoute) { //sets route walker to the mining path and toggles on
+                    //val path = routeWalker.loadPathFromJson("miningRoute") //always sets to miningRoute, not good...
+
+                    if (miningRoute1 != null && !this.walkingRoute) {
                         this.walkingRoute = true
-                        routeWalker.setPath(path)
-                        routeWalker.toggle()
+                        routeWalker.setPath(miningRoute1)
+                        routeWalker.toggle() // toggles on
                         println("toggled walker")
+                        routeWalker.triggerOnEnd {
+                            println("route ended le sigma")
+                            if (flipflop == 0) {
+                                miningRoute1 = routeWalker.loadPathFromJson("miningRouteReturn")
+
+                                flipflop = 1
+                            } else if (flipflop == 1) {
+                                miningRoute1 = routeWalker.loadPathFromJson("miningRoute")
+
+                                flipflop = 0
+                            }
+                            routeWalker.setPath(miningRoute1)
+                           // routeWalker.toggle() // toggles on the new path
+                        }
                     }
                     val closestCoordinates = routeWalker.getClosestCoordinates()
-                    if (closestCoordinates != null && closestCoordinates.size == 3) {
+                    if (closestCoordinates != null && closestCoordinates.size == 3) { //finds closest/current waypoint coords
                         val (x, y, z) = closestCoordinates
-                        if (isPlayerNearCoordinates(x, y, z, 2.0) && !scanForPlayersAroundCoords(x, y, z)) {
-                            if(blockScan.fullSortScan().size >= 1) {
+                        if (isPlayerNearCoordinates(x, y, z, 2.0) && !scanForPlayersAroundCoords(x, y, z)) { //if player is near a waypoint and there are no other players
+                            if(blockScan.fullSortScan().size >= 1) { //check for blocks
                                 println("found blocks to mine")
-                                routeWalker.toggle()
-                                this.state = MacroStates.MINING
+                                routeWalker.toggle() //stop moving
+                                this.state = MacroStates.MINING //set to mining
                                 this.walkingRoute = false
                             }
                         }
                     }
-
-                    if(path.contentEquals(routeWalker.loadPathFromJson("miningRoute"))){
-                        routeWalker.triggerOnEnd {
-                            val path = routeWalker.loadPathFromJson("miningRouteReturn")
-                            routeWalker.setPath(path)
-                        }
-                    }
-                    if(path.contentEquals(routeWalker.loadPathFromJson("miningRouteReturn"))){
-                        routeWalker.triggerOnEnd {
-                            val path = routeWalker.loadPathFromJson("miningRoute")
-                            routeWalker.setPath(path)
-                        }
-                    }
-
                 }
+
+
 
                 if (this.state == MacroStates.CRAFTING) {
                     println(this.state)
@@ -529,7 +540,7 @@ class HighliteMacro {
         val localPlayer = Minecraft.getMinecraft().thePlayer
         var found = false
         for (player in players) {
-            if (player != localPlayer && mathUtils.calculateDistance(arrayOf(player.posX, player.posY, player.posZ), arrayOf(x, y, z))["distanceFlat"]!! < 3) {
+            if (player != localPlayer && mathUtils.calculateDistance(arrayOf(player.posX, player.posY, player.posZ), arrayOf(x, y, z))["distanceFlat"]!! < 4) {
                 found = true
                 break
             }

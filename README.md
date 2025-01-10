@@ -1,5 +1,7 @@
 Kotlin is cool
 
+I wanna die
+
 maxpenisclient /addons /idk what to call this shit
 
 oneconfig used for gui
