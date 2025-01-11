@@ -206,7 +206,7 @@ class HighliteMacro {
                                                 this.menuCooldown.reset()
                                                 this.returnTimer.reset()
                                                 println("Clicked that yordan at slot $i")
-                                                Minecraft.getMinecraft().displayGuiScreen(null)
+                                                Minecraft.getMinecraft().thePlayer.closeScreen()
                                                 this.state = MacroStates.WALKING
                                                 break
                                             }
@@ -226,13 +226,23 @@ class HighliteMacro {
             if (this.Enabled) {
                 if (!location.isInSkyblock) {
                     println("not in skyblock nigger")
+                    if (isPlayerNearCoordinates(12.0, 75.0, 2.0, 8.0)){
+                        if (this.returnTimer.hasReached(10000))
+                        sendChatMessage("/skyblock")
+                        this.returnTimer.reset()
+                    }
+
                    return
                }
+
+                if(location.currentArea != Island.TheRift && this.state != MacroStates.RETURNING){
+                    this.state = MacroStates.RETURNING
+                }
 
                 //handles returning to mountaintop
                 if(this.state == MacroStates.RETURNING){
                     if(isPlayerNearCoordinates(42.5, 122.0, 69.0, 2.0) && location.currentArea == Island.Hub){ ///warp wizard coordinates
-                        val path = routeWalker.loadPathFromJson("wizardToRift1")
+                        val path = routeWalker.loadPathFromJson("wizardToRift1") //walk to wizard
                         if (path != null) {
                             if(this.returnTimer.hasReached(2000)) {
                                 routeWalker.setPath(path)
@@ -390,10 +400,7 @@ class HighliteMacro {
                 }
 
 
-                if (this.state == MacroStates.WALKING && location.currentArea == Island.TheRift){
-
-
-                    //val path = routeWalker.loadPathFromJson("miningRoute") //always sets to miningRoute, not good...
+                if (this.state == MacroStates.WALKING && location.currentArea == Island.TheRift) {
 
                     if (miningRoute1 != null && !this.walkingRoute) {
                         this.walkingRoute = true
@@ -404,22 +411,21 @@ class HighliteMacro {
                             println("route ended le sigma")
                             if (flipflop == 0) {
                                 miningRoute1 = routeWalker.loadPathFromJson("miningRouteReturn")
-
                                 flipflop = 1
                             } else if (flipflop == 1) {
                                 miningRoute1 = routeWalker.loadPathFromJson("miningRoute")
-
                                 flipflop = 0
                             }
+                            this.walkingRoute = false // reset walkingRoute flag
                             routeWalker.setPath(miningRoute1)
-                           // routeWalker.toggle() // toggles on the new path
+                            routeWalker.toggle() // toggles on the new path
                         }
                     }
                     val closestCoordinates = routeWalker.getClosestCoordinates()
                     if (closestCoordinates != null && closestCoordinates.size == 3) { //finds closest/current waypoint coords
                         val (x, y, z) = closestCoordinates
                         if (isPlayerNearCoordinates(x, y, z, 2.0) && !scanForPlayersAroundCoords(x, y, z)) { //if player is near a waypoint and there are no other players
-                            if(blockScan.fullSortScan().size >= 1) { //check for blocks
+                            if (blockScan.fullSortScan().size >= 1) { //check for blocks
                                 println("found blocks to mine")
                                 routeWalker.toggle() //stop moving
                                 this.state = MacroStates.MINING //set to mining
