@@ -1,31 +1,25 @@
 package com.github.hul1an.maxpenisclient.features
 
-import com.github.hul1an.maxpenisclient.MyConfig
-import com.github.hul1an.maxpenisclient.clock.utils
+
+
 import com.github.hul1an.maxpenisclient.utils.*
-import com.github.hul1an.maxpenisclient.utils.RouteWalker.MacroStates
-import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.init.Blocks
-import net.minecraft.init.Items
 import net.minecraft.inventory.ContainerChest
 import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
-import net.minecraft.util.Vec3i
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import java.util.Timer
-import java.util.TimerTask
+
 
 
 //Hul1an is solely responsible for this monster of a function, and only he has the lack of sanity to debug it and work on it
-
+// sigma macro 750 lines of uncommented code :fire: :fire:
 
 class HighliteMacro {
 
@@ -46,7 +40,7 @@ class HighliteMacro {
 
 
 
-    val config = MyConfig()
+
     val movementHelper = MovementHelper()
     val rotations = Rotations()
     val location = LocationUtils
@@ -108,11 +102,6 @@ class HighliteMacro {
 
     @SubscribeEvent
     fun onClientTick(event: TickEvent.ClientTickEvent) {
-       // when (config.finalAge) {
-          //  0 -> this.finalAge = 3 //youngite
-          //  1 -> this.finalAge = 11 //timeite
-          //  2 -> this.finalAge = 10 //obsolite
-      //  }
         if (event.phase == TickEvent.Phase.START) {
             if (!this.Enabled) {
                 return
@@ -238,8 +227,9 @@ class HighliteMacro {
                 if(location.currentArea != Island.TheRift && this.state != MacroStates.RETURNING){
                     this.state = MacroStates.RETURNING
                 }
+                //TODO
+                //currently bugs out on rift collapse and requires user intervention, not ideal.
 
-                //handles returning to mountaintop
                 if(this.state == MacroStates.RETURNING){
                     if(isPlayerNearCoordinates(42.5, 122.0, 69.0, 2.0) && location.currentArea == Island.Hub){ ///warp wizard coordinates
                         val path = routeWalker.loadPathFromJson("wizardToRift1") //walk to wizard

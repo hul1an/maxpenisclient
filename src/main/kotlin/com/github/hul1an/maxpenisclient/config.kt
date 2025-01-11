@@ -12,32 +12,31 @@ import cc.polyfrost.oneconfig.config.data.OptionSize
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard
 
 
-class MyConfig : Config(Mod("maxpenisaddons", ModType.SKYBLOCK), "maxpenisConfig.json") {
+object MyConfig : Config(Mod("maxpenisaddons", ModType.SKYBLOCK), "maxpenisConfig.json") {
 
     @KeyBind(name = "Highlite Miner Keybind", category = "Rift", subcategory = "mountaintop")
-    lateinit var minerKeyBind: OneKeyBind // had to move ts to the top because oneconfig in kotlin is strange
-
+    lateinit var minerKeyBind: OneKeyBind
 
     init {
         initialize()
         minerKeyBind = OneKeyBind(UKeyboard.KEY_B)
 
         addDependency("subSwitch") { masterSwitch }
-        addDependency("rotationSmoothness") { highliteMinerMainToggle } // doesnt work
+        addDependency("rotationSmoothness") { highliteMinerMainToggle }
         addDependency("minerKeyBind") { highliteMinerMainToggle }
 
         addListener("rotationSmoothness") { save() }
-
     }
-    //test
+
     @Switch(name = "Master Switch", size = OptionSize.DUAL, category = "General", subcategory = "Switches")
     var masterSwitch: Boolean = false
+
     @Switch(name = "Sub Switch", size = OptionSize.DUAL, category = "General", subcategory = "Switches")
     var subSwitch: Boolean = false
 
-    //rift
     @Switch(name = "Highlite Miner", size = OptionSize.DUAL, category = "Rift", subcategory = "mountaintop")
     var highliteMinerMainToggle: Boolean = false
+
     @Slider(name = "Rotation Smoothness", min = 5f, max = 25f, step = 5, category = "Rift", subcategory = "mountaintop")
     var rotationSmoothness = 15f
 }

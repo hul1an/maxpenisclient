@@ -1,6 +1,5 @@
 package com.github.hul1an.maxpenisclient.utils
 
-import com.github.hul1an.maxpenisclient.MyConfig
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -33,7 +32,6 @@ class RouteWalker {
     private val areas: MutableList<Area> = mutableListOf()
 
     val MathUtils = MathUtilsClass()
-    val config = MyConfig()
     val movementHelper = MovementHelper()
     val Rotations = Rotations()
 

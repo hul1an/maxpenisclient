@@ -28,7 +28,7 @@ import org.lwjgl.input.Keyboard
 
 class ModCore {
 
-    val config = MyConfig()
+    val config = MyConfig
     val highliteMacro = HighliteMacro()
     val routeWalker = RouteWalker()
 
@@ -37,7 +37,7 @@ class ModCore {
     fun init(event: FMLInitializationEvent) {
 
         MinecraftForge.EVENT_BUS.register(MyEventHandlerClass())
-        MinecraftForge.EVENT_BUS.register(this)
+       // MinecraftForge.EVENT_BUS.register(this)
         MinecraftForge.EVENT_BUS.register(KeyBindHandler(config.minerKeyBind, highliteMacro))
         MinecraftForge.EVENT_BUS.register(highliteMacro)
         MinecraftForge.EVENT_BUS.register(routeWalker)

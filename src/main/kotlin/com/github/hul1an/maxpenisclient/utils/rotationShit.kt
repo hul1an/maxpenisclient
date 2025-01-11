@@ -15,7 +15,7 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 class Rotations {
-    val config = MyConfig()
+    val config = MyConfig
 
     private var SPEED = config.rotationSmoothness.toInt()
     private var RANDOMNESS = 10
