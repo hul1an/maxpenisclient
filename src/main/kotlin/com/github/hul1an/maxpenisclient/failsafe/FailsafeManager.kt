@@ -1,0 +1,3 @@
+package com.github.hul1an.maxpenisclient.failsafe
+
+//nothing here gang...

@@ -2,6 +2,7 @@ package com.github.hul1an.maxpenisclient.features
 
 
 
+import com.github.hul1an.maxpenisclient.clock.utils
 import com.github.hul1an.maxpenisclient.utils.*
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
@@ -18,7 +19,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 
 
 
-//Hul1an is solely responsible for this monster of a function, and only he has the lack of sanity to debug it and work on it
+//Hul1an is solely responsible for this monster of a feature, and only he has the lack of sanity to debug it and work on it
 // sigma macro 750 lines of uncommented code :fire: :fire:
 
 class HighliteMacro {
@@ -174,6 +175,7 @@ class HighliteMacro {
                 }
                 //handles crafting higlite using quickcraft
                 if (location.currentArea == Island.TheRift && this.state == MacroStates.CRAFTING) {
+                    utils.customChat("Crafting Highlite")
                     val currentScreen = Minecraft.getMinecraft().currentScreen
                     if (currentScreen is GuiChest) {
                         val currentScreen1 = currentScreen as GuiChest
@@ -245,7 +247,7 @@ class HighliteMacro {
                     }
                     else if (!isPlayerNearCoordinates(42.5, 122.0, 69.0, 10.0) && location.currentArea != Island.TheRift && location.currentArea != Island.Unknown){ // warps 2 wizard
                         if(this.returnTimer.hasReached(3000)) {
-                            println("time 2 warp")
+                            utils.customChat("Warping to wizard")
                             sendChatMessage("/warp wizard")
                             this.returnTimer.reset()
                         }
@@ -335,7 +337,7 @@ class HighliteMacro {
                     println(this.state)
 
 
-                    //checking if we can craft 2 highlite then setting state to crafting
+                    //checking if we can craft highlite then setting state to crafting
                     val youngiteCount = scanInventory(Youngite)
                     val timeiteCount = scanInventory(Timeite)
                     val obsoliteCount = scanInventory(Obsolite)
@@ -367,11 +369,10 @@ class HighliteMacro {
 
                         if (currentBlockMeta == this.finalAge) {
                             if (mineBlock(currentBlock)) {
-
                             }
                         }
                         else if(currentBlockMeta != this.finalAge && this.state == MacroStates.MINING) {
-                            movementHelper.setKey("leftclick", down = false)
+                            movementHelper.setKey("leftclick", down = false) //stops mining
                             if (ageBlock(currentBlock)) {
                                 if (blockScan.fullSortScan().size == 0) {
                                     movementHelper.setKey("rightclick", down = false)
@@ -597,6 +598,8 @@ class HighliteMacro {
         this.Enabled = !this.Enabled
 
         if (this.Enabled) {
+            utils.customChat("highlite macro enabled")
+            MouseUtils.unGrabMouse()
             System.out.println("currently enabled")
             //this.startTime = Date.now()
             this.state = MacroStates.WAITING;
@@ -615,6 +618,8 @@ class HighliteMacro {
             }
         }
         if (!this.Enabled) {
+            utils.customChat("highlite macro disabled")
+
             println("bot stopped")
             stopBot()
         }
@@ -645,7 +650,9 @@ class HighliteMacro {
         routeWalker.setPath(path)
         routeWalker.toggle()
         rotations.stopRotate()
+        MouseUtils.reGrabMouse()
     }
+
     fun sendChatMessage(message: String) { Minecraft.getMinecraft().thePlayer.sendChatMessage(message) }
 
 
@@ -725,27 +732,3 @@ class HighliteMacro {
 
 
 }
-
-
-
-    /*
-    class MiningBlock(val blockid: Int, val metadata: Int) {
-
-        fun equals(block: Block): Boolean {
-            val blockState = block.defaultState
-            return block.getMetaFromState(blockState) == this.metadata && Block.getIdFromBlock(block) == this.blockid
-        }
-
-        fun equalsNumbers(blockid: Int, metadata: Int): Boolean {
-            return blockid == this.blockid && metadata == this.metadata
-        }
-    }
-
-    class MineTarget(val pos: BlockPos, val point: Vec3, block: Block) {
-        val metadata: Int = block.getMetaFromState(block.defaultState)
-        val blockid: Int = Block.getIdFromBlock(block)
-    }
-
-     */
-
-//class MineVein(val positions: Array<BlockPos>)

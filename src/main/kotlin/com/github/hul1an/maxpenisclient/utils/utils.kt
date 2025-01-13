@@ -2,11 +2,9 @@ package com.github.hul1an.maxpenisclient.utils
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor.Companion.FORMATTING_CODE_PATTERN
 import net.minecraft.client.Minecraft
+import net.minecraft.event.ClickEvent
 import net.minecraft.network.Packet
-import net.minecraft.util.AxisAlignedBB
-import net.minecraft.util.BlockPos
-import net.minecraft.util.Vec3i
-import net.minecraft.util.Vec3
+import net.minecraft.util.*
 import java.util.*
 
 class UtilsClass {
@@ -114,10 +112,12 @@ class UtilsClass {
     }
 
 
-
-
-
     val mc: Minecraft = Minecraft.getMinecraft()
+
+    fun customChat(message: String) {
+        Minecraft.getMinecraft().thePlayer.addChatMessage(ChatComponentText("§0[§bMaxPenis§0] §7$message").setChatStyle(ChatStyle().setColor(EnumChatFormatting.GRAY))
+        )
+    }
 
 
 }

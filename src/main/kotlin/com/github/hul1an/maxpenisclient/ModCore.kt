@@ -65,7 +65,7 @@ class ModCore {
     companion object {
         const val MOD_ID = "maxpenisaddons"
         const val NAME = "MaxPenisAddons"
-        const val VERSION = "1.0.0"
+        const val VERSION = "1.1.0"
     }
 }
 
