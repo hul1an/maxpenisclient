@@ -38,5 +38,5 @@ object MyConfig : Config(Mod("maxpenisaddons", ModType.SKYBLOCK), "maxpenisConfi
     var highliteMinerMainToggle: Boolean = false
 
     @Slider(name = "Rotation Smoothness", min = 5f, max = 25f, step = 5, category = "Rift", subcategory = "mountaintop")
-    var rotationSmoothness = 15f
+    var rotationSmoothness = 10f
 }

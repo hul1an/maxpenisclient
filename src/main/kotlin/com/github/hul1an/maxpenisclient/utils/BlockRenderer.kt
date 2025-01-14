@@ -188,7 +188,7 @@ class BlockRenderer {
         }
     }*/
 
-    fun drawString(name: String, location: Array<Double>, color: FloatArray = floatArrayOf(128f, 128f, 128f), size: Float = 0.3f, increase: Boolean = false) {
+     fun drawString(name: String, location: Array<Double>, color: FloatArray = floatArrayOf(128f, 128f, 128f), size: Float = 0.3f, increase: Boolean = false) {
         val fontRenderer = Minecraft.getMinecraft().fontRendererObj
         val x = (location[0] + 0.5).toFloat()
         val y = (location[1] + 0.5).toFloat()
@@ -200,7 +200,8 @@ class BlockRenderer {
         GL11.glScalef(scale, scale, scale)
         GL11.glNormal3f(0.0f, 1.0f, 0.0f)
         GL11.glRotatef(-Minecraft.getMinecraft().thePlayer.rotationYaw, 0.0f, 1.0f, 0.0f)
-        GL11.glRotatef(-Minecraft.getMinecraft().thePlayer.rotationPitch, 1.0f, 0.0f, 0.0f) // Invert the pitch rotation
+        GL11.glRotatef(Minecraft.getMinecraft().thePlayer.rotationPitch, 1.0f, 0.0f, 0.0f)
+        GL11.glRotatef(180f, 0.0f, 0.0f, 1.0f) // Flip the text upside down
         GL11.glDisable(GL11.GL_LIGHTING)
         GL11.glDepthMask(false)
         GL11.glDisable(GL11.GL_DEPTH_TEST)

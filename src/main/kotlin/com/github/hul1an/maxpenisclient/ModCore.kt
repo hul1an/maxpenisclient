@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.eventhandler.Cancelable
 import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import cc.polyfrost.oneconfig.config.core.OneKeyBind
+import com.github.hul1an.maxpenisclient.MyConfig.highliteMinerMainToggle
 import com.github.hul1an.maxpenisclient.commands.*
 import com.github.hul1an.maxpenisclient.features.HighliteMacro
 import com.github.hul1an.maxpenisclient.utils.LocationUtils
@@ -105,7 +106,7 @@ class KeyBindHandler(private val minerKeyBind: OneKeyBind, private val highliteM
 
     @SubscribeEvent
     fun onKeyInput(event: InputEvent.KeyInputEvent) {
-        if (Keyboard.getEventKeyState() && minerKeyBind.isActive) {
+        if (Keyboard.getEventKeyState() && minerKeyBind.isActive && highliteMinerMainToggle) {
             // Handle the key press event
             println("Miner key bind pressed")
             highliteMacro.toggle()

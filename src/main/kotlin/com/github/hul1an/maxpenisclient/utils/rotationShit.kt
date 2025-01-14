@@ -18,8 +18,8 @@ class Rotations {
     val config = MyConfig
 
     private var SPEED = config.rotationSmoothness.toInt()
-    private var RANDOMNESS = 10
-    private var TREMOR_FREQUENCY = 40
+    private var RANDOMNESS = 5
+    private var TREMOR_FREQUENCY = 20
 
     private var update = true
     private var rotate = false
