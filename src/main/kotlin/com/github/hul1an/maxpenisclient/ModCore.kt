@@ -45,6 +45,7 @@ class ModCore {
         ClientCommandHandler.instance.registerCommand(CrashCommand())
         ClientCommandHandler.instance.registerCommand(RotationTest())
         ClientCommandHandler.instance.registerCommand(LocationTest())
+        //ClientCommandHandler.instance.registerCommand(AstarWalkTest())
         ClientCommandHandler.instance.registerCommand(TestRouteWalkerRoute(routeWalker))
         ClientCommandHandler.instance.registerCommand(AddWaypointCommand(routeWalker))
         ClientCommandHandler.instance.registerCommand(RemoveWaypointCommand(routeWalker))

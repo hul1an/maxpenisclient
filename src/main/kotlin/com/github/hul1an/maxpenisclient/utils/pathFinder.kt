@@ -6,11 +6,9 @@ import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3i
 import kotlin.math.*
 
-class PathFinderClass {
 
-    init {
-    //calculate maximum penis efficiency
-    }
+
+
 
 
 
@@ -53,6 +51,14 @@ class PathFinderClass {
             neighbors.add(Node(position.add(Vec3i(0,0,1)), 2.0 ))
             neighbors.add(Node(position.add(Vec3i(1,0,-1)), 2.0 ))
 
+            //diagonal
+           // neighbors.add(Node(position.add(Vec3i(1, 0, 1)), 2.8))
+           // neighbors.add(Node(position.add(Vec3i(1, 0, -1)), 2.8))
+           // neighbors.add(Node(position.add(Vec3i(-1, 0, 1)), 2.8))
+           // neighbors.add(Node(position.add(Vec3i(-1, 0, -1)), 2.8))
+
+            //gonna try without diagonal + height variation, might fuck something up idk
+
             //cardinal + down
             neighbors.add(Node(position.add(Vec3i(1, -1, 0)), heightCost.toDouble()))
             neighbors.add(Node(position.add(Vec3i(-1,-1,0)), heightCost.toDouble()))
@@ -87,56 +93,12 @@ class PathFinderClass {
             var heightDifference = true
         }
 
-        fun aStar(target: BlockPos, begin: BlockPos? = null, heightCost: Int = 2, smallArea:Boolean = false, heightDifference:Boolean = true): MutableList<BlockPos> {
-            val start = begin ?: Minecraft.getMinecraft().thePlayer.position
-            val end = target
-            val open = mutableListOf<Node>()
-            val closed = mutableListOf<Node>()
-            val path = mutableListOf<BlockPos>()
-
-            val startNode = Grid.nodeFromWorld(start)
-            val endNode = Grid.nodeFromWorld(end)
-
-            open.add(startNode)
-
-            while (open.isNotEmpty()) {
-                val currentNode = open.minByOrNull { it.fCost!! }!!
-                open.remove(currentNode)
-                closed.add(currentNode)
-
-                if (currentNode == endNode) {
-                    var current = currentNode
-                    while (current.parent != null) {
-                        path.add(current.pos)
-                        current = current.parent!!
-                    }
-                    return path.reversed().toMutableList()
-                }
-
-                val neighbors = Grid.getNeighbors(currentNode)
-                for (neighbor in neighbors) {
-                    if (neighbor in closed) {
-                        continue
-                    }
-
-                    val newMovementCostToNeighbor = currentNode.gCost!! + Grid.heightCost
-                    if (newMovementCostToNeighbor < neighbor.gCost!! || neighbor !in open) {
-                        neighbor.gCost = newMovementCostToNeighbor
-                        neighbor.hCost = mathUtils.calculateDistance(arrayOf(neighbor.pos.x.toDouble(), neighbor.pos.y.toDouble(), neighbor.pos.z.toDouble()), arrayOf(endNode.pos.x.toDouble(), endNode.pos.y.toDouble(), endNode.pos.z.toDouble()))["distance"]!!
-                        neighbor.parent = currentNode
-                        neighbor.setFCost()
-
-                        if (neighbor !in open) {
-                            open.add(neighbor)
-                        }
-                    }
-                }
-            }
-            return path
+        fun aStar() {
+            //not sigma
         }
 
 
     }
 
-}
+
 

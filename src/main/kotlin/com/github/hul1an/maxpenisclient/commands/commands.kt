@@ -1,7 +1,6 @@
 package com.github.hul1an.maxpenisclient.commands
 
-import com.github.hul1an.maxpenisclient.utils.LocationUtils
-import com.github.hul1an.maxpenisclient.utils.RouteWalker
+import com.github.hul1an.maxpenisclient.utils.*
 import com.github.hul1an.maxpenisclient.utils.Rotations
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
@@ -9,10 +8,6 @@ import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
 import net.minecraft.event.ClickEvent
 import net.minecraft.init.Blocks
-import net.minecraft.util.ChatComponentText
-import net.minecraft.util.ChatStyle
-import net.minecraft.util.Vec3
-import net.minecraft.util.Vec3i
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.FMLCommonHandler
@@ -24,8 +19,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.apache.logging.log4j.LogManager
 import kotlin.reflect.KParameter
 
-import com.github.hul1an.maxpenisclient.utils.Waypoint
 import net.minecraft.command.CommandXP
+import net.minecraft.pathfinding.PathFinder
+import net.minecraft.util.*
 
 
 class CrashCommand: CommandBase() {
@@ -191,6 +187,44 @@ class LocationTest: CommandBase() {
     }
 
 }
+/*
+class AstarWalkTest: CommandBase() {
+    private val pathFinder = PathFinderClass()
+    private val routeWalker = RouteWalker()
+    override fun getCommandName(): String {
+        return "astarwalk"
+    }
 
+    override fun getCommandUsage(sender: ICommandSender?): String {
+        return "/astar walk <x> <y> <z>"
+    }
+
+    override fun processCommand(sender: ICommandSender?, args: Array<out String>?) {
+        if (args != null && args.size == 3) {
+            val x = args[0].toDoubleOrNull()
+            val y = args[1].toDoubleOrNull()
+            val z = args[2].toDoubleOrNull()
+
+            if (x != null && y != null && z != null) {
+                var goalBlock = BlockPos(x, y, z)
+                val path: List<List<Double>>? = pathFinder.aStar(goalBlock)
+                val arrayPath: Array<Array<Double>>? = path?.map { it.toTypedArray() }?.toTypedArray()
+                routeWalker.setPath(arrayPath)
+                routeWalker.toggle()
+
+            } else {
+                sender?.addChatMessage(ChatComponentText("Invalid coordinates"))
+            }
+        } else {
+            sender?.addChatMessage(ChatComponentText("Usage: ${getCommandUsage(sender)}"))
+        }
+    }
+
+    override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean {
+        return true
+    }
+
+}
+*/
 
 
