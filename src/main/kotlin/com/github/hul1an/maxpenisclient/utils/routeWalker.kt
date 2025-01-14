@@ -1,11 +1,9 @@
 package com.github.hul1an.maxpenisclient.utils
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.minecraft.client.Minecraft
-import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -46,6 +44,8 @@ class RouteWalker {
     private var path: Array<Array<Double>>
     private var Enabled: Boolean
 
+
+
     init {
         this.Enabled = false
         this.path = emptyArray()
@@ -61,6 +61,14 @@ class RouteWalker {
         // Register to the event bus
         MinecraftForge.EVENT_BUS.register(this)
     }
+
+    @SubscribeEvent
+    fun onRenderWorld2(event: RenderWorldLastEvent) {
+        if (path.isNotEmpty()) {
+            BlockRenderer().renderCordsWithNumbers(path)
+        }
+    }
+
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
