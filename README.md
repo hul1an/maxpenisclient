@@ -1,3 +1,10 @@
+uhhh made public because skyblock is fart
+30% skidded 30% gpt 30% retard monkeys throwing shit till it stick
+tested for like 20 hours or so no ban, no failsafes tho so if u get specced its joever
+also it gets stuck a lot on one waypoint that i cba to fix jst press space
+happy skidding to anyone that found this ig idek
+
+=======
 Kotlin is cool
 
 I wanna die
